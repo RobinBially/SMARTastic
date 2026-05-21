@@ -10,6 +10,10 @@ Native macOS app for visualizing SSD and HDD SMART data.
 
 ---
 
+<p align="center">
+  <img src="assets/screenshot.png" alt="SMARTastic Screenshot" width="720">
+</p>
+
 **SMARTastic** shows drive health at a glance — temperature, wear, errors, TB written, and estimated remaining life. Built with SwiftUI, powered by `smartctl`.
 
 ## Features
