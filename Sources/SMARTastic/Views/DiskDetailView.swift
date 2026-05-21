@@ -42,11 +42,11 @@ struct DiskDetailView: View {
                     Badge(disk.driveType.rawValue, color: .blue)
                     Badge(disk.interface, color: .secondary)
                     if disk.smartAvailable {
-                        Badge(disk.smartPassed ? "SMART OK" : "SMART FEHLER",
+                        Badge(loc(disk.smartPassed ? "badge.smart_ok" : "badge.smart_error"),
                               color: disk.smartPassed ? .green : .red)
                         Badge(disk.healthLabel, color: disk.healthColor)
                     } else {
-                        Badge("SMART n/a", color: .gray)
+                        Badge(loc("badge.smart_na"), color: .gray)
                     }
                 }
             }
@@ -79,7 +79,7 @@ struct DiskDetailView: View {
                     .font(.title3.weight(.bold))
                     .monospacedDigit()
             }
-            Text("Health")
+            Text(LocalizedStringKey("label.health"), bundle: .module)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
@@ -89,15 +89,15 @@ struct DiskDetailView: View {
 
     private var healthOverview: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("Gesundheit", icon: "heart.text.clipboard")
+            sectionTitle(loc("section.health"), icon: "heart.text.clipboard")
 
             HStack(spacing: 20) {
                 if disk.driveType == .ssd {
                     LargeGauge(
                         value: disk.percentageUsed,
                         maxValue: 100,
-                        label: "Lebensdauer",
-                        unit: "% verbraucht",
+                        label: loc("gauge.lifespan"),
+                        unit: loc("gauge.lifespan_unit"),
                         inverted: true,
                         color: disk.healthColor,
                         detail: disk.remainingLifeEstimate
@@ -107,7 +107,7 @@ struct DiskDetailView: View {
                 LargeGauge(
                     value: disk.temperature,
                     maxValue: disk.driveType == .ssd ? 85 : 65,
-                    label: "Temperatur",
+                    label: loc("gauge.temperature"),
                     unit: "\u{00B0}C",
                     inverted: false,
                     color: disk.tempColor,
@@ -117,21 +117,21 @@ struct DiskDetailView: View {
                 LargeGauge(
                     value: disk.availableSpare,
                     maxValue: 100,
-                    label: "Reserve",
+                    label: loc("gauge.spare"),
                     unit: "%",
                     inverted: false,
                     color: .green,
-                    detail: "Verfügbar"
+                    detail: loc("gauge.spare_detail")
                 )
 
                 LargeGauge(
                     value: Double(disk.mediaErrors),
                     maxValue: max(100, Double(disk.mediaErrors) * 2),
-                    label: "Medienfehler",
+                    label: loc("gauge.media_errors"),
                     unit: "",
                     inverted: false,
                     color: disk.mediaErrors == 0 ? .green : .red,
-                    detail: disk.mediaErrors == 0 ? "Keine" : "\(disk.mediaErrors)"
+                    detail: disk.mediaErrors == 0 ? loc("gauge.media_errors_detail_none") : "\(disk.mediaErrors)"
                 )
             }
         }
@@ -143,34 +143,34 @@ struct DiskDetailView: View {
 
     private var performanceSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("Nutzung", icon: "chart.bar.fill")
+            sectionTitle(loc("section.usage"), icon: "chart.bar.fill")
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 if disk.driveType == .ssd {
-                    MetricBox(icon: "arrow.down.circle", label: "Gelesen",
+                    MetricBox(icon: "arrow.down.circle", label: loc("metric.read"),
                               value: "\(String(format: "%.1f", disk.dataReadTB)) TB",
-                              detail: "\(String(format: "%.1f", disk.dailyReadGB)) GB/Tag")
-                    MetricBox(icon: "arrow.up.circle", label: "Geschrieben",
+                              detail: "\(String(format: "%.1f", disk.dailyReadGB)) \(loc("metric.per_day"))")
+                    MetricBox(icon: "arrow.up.circle", label: loc("metric.written"),
                               value: "\(String(format: "%.1f", disk.dataWrittenTB)) TB",
-                              detail: "\(String(format: "%.1f", disk.dailyWriteGB)) GB/Tag")
+                              detail: "\(String(format: "%.1f", disk.dailyWriteGB)) \(loc("metric.per_day"))")
                 } else {
-                    MetricBox(icon: "arrow.down.circle", label: "Gelesen", value: "\u{2014}", detail: "")
-                    MetricBox(icon: "arrow.up.circle", label: "Geschrieben", value: "\u{2014}", detail: "")
+                    MetricBox(icon: "arrow.down.circle", label: loc("metric.read"), value: "\u{2014}", detail: "")
+                    MetricBox(icon: "arrow.up.circle", label: loc("metric.written"), value: "\u{2014}", detail: "")
                 }
-                MetricBox(icon: "clock", label: "Betriebszeit",
+                MetricBox(icon: "clock", label: loc("metric.power_on_time"),
                           value: disk.powerOnFormatted,
-                          detail: "\(disk.powerOnHours) Stunden")
-                MetricBox(icon: "power", label: "Power Cycles",
+                          detail: "\(disk.powerOnHours) \(loc("metric.power_on_detail"))")
+                MetricBox(icon: "power", label: loc("metric.power_cycles"),
                           value: "\(disk.powerCycles)",
-                          detail: "Neustarts")
+                          detail: loc("metric.power_cycles_detail"))
                 if disk.driveType == .ssd {
-                    MetricBox(icon: "exclamationmark.triangle", label: "Unsafe Shutdowns",
+                    MetricBox(icon: "exclamationmark.triangle", label: loc("metric.unsafe_shutdowns"),
                               value: "\(disk.unsafeShutdowns)",
-                              detail: "Unsichere Trennungen")
+                              detail: loc("metric.unsafe_shutdowns_detail"))
                 }
-                MetricBox(icon: "ant", label: "Medienfehler",
+                MetricBox(icon: "ant", label: loc("gauge.media_errors"),
                           value: "\(disk.mediaErrors)",
-                          detail: disk.mediaErrors == 0 ? "Fehlerfrei" : "Fehlerhaft")
+                          detail: disk.mediaErrors == 0 ? loc("metric.media_errors_none") : loc("metric.media_errors_some"))
             }
         }
         .padding(16)
@@ -181,24 +181,24 @@ struct DiskDetailView: View {
 
     private var attributesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("Lebensdauer-Prognose", icon: "calendar")
+            sectionTitle(loc("section.life_prognosis"), icon: "calendar")
 
             HStack(spacing: 16) {
                 if disk.driveType == .ssd {
-                    DetailBox(label: "Verbrauchte Lebensdauer",
+                    DetailBox(label: loc("detail.life_consumed"),
                               value: "\(String(format: "%.1f", disk.percentageUsed))%",
                               icon: "timer")
-                    DetailBox(label: "Durchschn. Schreibrate",
-                              value: "\(String(format: "%.1f", disk.dailyWriteGB)) GB/Tag",
+                    DetailBox(label: loc("detail.avg_write_rate"),
+                              value: "\(String(format: "%.1f", disk.dailyWriteGB)) \(loc("metric.per_day"))",
                               icon: "speedometer")
-                    DetailBox(label: "Geschätzte Restlebensdauer",
+                    DetailBox(label: loc("detail.remaining_life"),
                               value: disk.remainingLifeEstimate,
                               icon: "hourglass")
                 } else {
-                    DetailBox(label: "Betriebszeit",
+                    DetailBox(label: loc("detail.power_on"),
                               value: disk.powerOnFormatted,
                               icon: "clock")
-                    DetailBox(label: "Power Cycles",
+                    DetailBox(label: loc("detail.power_cycles"),
                               value: "\(disk.powerCycles)",
                               icon: "power")
                 }
@@ -217,9 +217,9 @@ struct DiskDetailView: View {
                     .font(.title2)
                     .foregroundStyle(.orange)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("SMART nicht verfügbar")
+                    Text(LocalizedStringKey("nosmart.title"), bundle: .module)
                         .font(.headline)
-                    Text("Der USB-Bridge-Chip dieses Gehäuses leitet keine SMART-Daten weiter. Das ist eine Hardware-Einschränkung des USB-Controllers.")
+                    Text(LocalizedStringKey("nosmart.message"), bundle: .module)
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
@@ -233,19 +233,19 @@ struct DiskDetailView: View {
 
     private var infoSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("Laufwerks-Informationen", icon: "info.circle.fill")
+            sectionTitle(loc("section.drive_info"), icon: "info.circle.fill")
 
             VStack(spacing: 0) {
-                InfoRow(label: "Seriennummer", value: disk.serial)
+                InfoRow(label: loc("info.serial"), value: disk.serial)
                 Divider().padding(.leading, 120)
-                InfoRow(label: "Firmware", value: disk.firmware)
+                InfoRow(label: loc("info.firmware"), value: disk.firmware)
                 Divider().padding(.leading, 120)
-                InfoRow(label: "Kapazität", value: disk.size)
+                InfoRow(label: loc("info.capacity"), value: disk.size)
                 Divider().padding(.leading, 120)
-                InfoRow(label: "Schnittstelle", value: disk.interface)
+                InfoRow(label: loc("info.interface"), value: disk.interface)
                 if disk.driveType == .ssd {
                     Divider().padding(.leading, 120)
-                    InfoRow(label: "TBW (geschätzt)",
+                    InfoRow(label: loc("info.tbw"),
                             value: disk.percentageUsed > 0
                                 ? "\(String(format: "%.0f", disk.dataWrittenTB / disk.percentageUsed * 100)) TB"
                                 : "\u{2014}")

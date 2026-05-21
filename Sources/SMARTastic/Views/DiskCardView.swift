@@ -74,7 +74,7 @@ struct DiskCardView: View {
             } else {
                 HStack(spacing: 4) {
                     Image(systemName: "questionmark.circle").font(.caption2)
-                    Text("SMART n/v").font(.caption2)
+                    Text(LocalizedStringKey("badge.smart_na_card"), bundle: .module).font(.caption2)
                 }
                 .foregroundStyle(.tertiary)
             }

@@ -41,8 +41,8 @@ struct DiskInfo: Identifiable, Hashable {
         let d = powerOnHours / 24
         let y = d / 365
         let r = d % 365
-        if y > 0 { return "\(y) J. \(r) T." }
-        return "\(d) Tage"
+        if y > 0 { return locf("power_on_years_days", y, r) }
+        return locf("power_on_days", d)
     }
 
     var dailyWriteGB: Double {
@@ -62,8 +62,8 @@ struct DiskInfo: Identifiable, Hashable {
         let d = Int(remainingHours / 24)
         let y = d / 365
         let r = d % 365
-        if y > 0 { return "\u{2248}\(y) J. \(r) T." }
-        return "\u{2248}\(d) Tage"
+        if y > 0 { return locf("remaining_years_days", y, r) }
+        return locf("remaining_days", d)
     }
 
     var healthScore: Int {
@@ -77,20 +77,20 @@ struct DiskInfo: Identifiable, Hashable {
     }
 
     var healthLabel: String {
-        guard smartAvailable else { return "Unbekannt" }
+        guard smartAvailable else { return loc("health.unknown") }
         if driveType == .ssd {
             switch percentageUsed {
-            case 0..<10: return "Ausgezeichnet"
-            case 10..<25: return "Sehr gut"
-            case 25..<50: return "Gut"
-            case 50..<75: return "Akzeptabel"
-            case 75..<90: return "Achtung"
-            default: return "Kritisch"
+            case 0..<10: return loc("health.excellent")
+            case 10..<25: return loc("health.very_good")
+            case 25..<50: return loc("health.good")
+            case 50..<75: return loc("health.acceptable")
+            case 75..<90: return loc("health.warning")
+            default: return loc("health.critical")
             }
         }
-        if mediaErrors == 0 { return "Gut" }
-        if mediaErrors < 10 { return "Achtung" }
-        return "Kritisch"
+        if mediaErrors == 0 { return loc("health.good") }
+        if mediaErrors < 10 { return loc("health.warning") }
+        return loc("health.critical")
     }
 
     var healthColor: Color {
@@ -103,10 +103,10 @@ struct DiskInfo: Identifiable, Hashable {
     var tempLabel: String {
         guard smartAvailable else { return "\u{2014}" }
         switch temperature {
-        case ..<40: return "Sehr kühl"
-        case 40..<55: return "Normal"
-        case 55..<70: return "Warm"
-        default: return "Hei\u{00DF}"
+        case ..<40: return loc("temp.very_cool")
+        case 40..<55: return loc("temp.normal")
+        case 55..<70: return loc("temp.warm")
+        default: return loc("temp.hot")
         }
     }
 

@@ -334,7 +334,7 @@ enum SmartCtlError: LocalizedError {
     case commandFailed(String)
     var errorDescription: String? {
         switch self {
-        case .commandFailed(let msg): return "smartctl Fehler: \(msg)"
+        case .commandFailed(let msg): return String(format: loc("smartctl_error"), msg)
         }
     }
 }

@@ -54,7 +54,7 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text("SMARTastic")
                     .font(.headline.weight(.semibold))
-                Text("SSD- und HDD-Status")
+                Text(LocalizedStringKey("sidebar.subtitle"), bundle: .module)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -73,7 +73,7 @@ struct ContentView: View {
             }
             .buttonStyle(.plain)
             .disabled(model.isLoading)
-            .help("Aktualisieren")
+            .help(loc("button.refresh.help"))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -100,10 +100,10 @@ struct ContentView: View {
             Image(systemName: "externaldrive.badge.questionmark")
                 .font(.system(size: 36))
                 .foregroundStyle(.tertiary)
-            Text("Keine Laufwerke gefunden")
+            Text(LocalizedStringKey("empty.no_drives"), bundle: .module)
                 .font(.callout)
                 .foregroundStyle(.secondary)
-            Button("Scannen") { model.refresh() }
+            Button(loc("button.scan")) { model.refresh() }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
             Spacer()
@@ -122,7 +122,7 @@ struct ContentView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
-            Button("Erneut versuchen") { model.refresh() }
+            Button(loc("button.retry")) { model.refresh() }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
             Spacer()
@@ -137,7 +137,7 @@ struct ContentView: View {
                     Circle()
                         .fill(.green)
                         .frame(width: 6, height: 6)
-                    Text("\(model.disks.count) Laufwerk\(model.disks.count != 1 ? "e" : "")")
+                    Text(verbatim: locf(model.disks.count == 1 ? "disk_count_one" : "disk_count_other", model.disks.count))
                         .font(.caption2)
                 }
                 .foregroundStyle(.secondary)
@@ -145,7 +145,7 @@ struct ContentView: View {
                 if let last = model.lastRefreshed {
                     Text("•")
                         .foregroundStyle(.tertiary)
-                    Text("vor \(relative(last))")
+                    Text(verbatim: locf("time.ago", relative(last)))
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
@@ -185,7 +185,7 @@ struct ContentView: View {
             Image(systemName: "externaldrive")
                 .font(.system(size: 48))
                 .foregroundStyle(.tertiary)
-            Text("Wähle ein Laufwerk aus")
+            Text(LocalizedStringKey("detail.no_selection"), bundle: .module)
                 .font(.title3.weight(.medium))
                 .foregroundStyle(.secondary)
         }
