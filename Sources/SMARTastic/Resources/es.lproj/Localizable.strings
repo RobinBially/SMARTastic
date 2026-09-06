@@ -115,3 +115,11 @@
 "history.details" = "Acerca de estos valores";
 "refresh.segment.help" = "Actualizar automáticamente o pausar para escanear solo manualmente.";
 "window.minimize" = "Minimizar";
+"history.range.help" = "Mostrar los últimos %d días naturales";
+"history.range.general" = "Elegir 7, 30 o 90 días naturales";
+"history.details.help" = "Explicar las lagunas, días parciales y límites de días";
+"history.hours" = "%.1f horas observadas";
+"history.estimated" = "Intervalo de medianoche repartido proporcionalmente";
+"history.no_measurement" = "Sin mediciones para este día";
+"refresh.pause.help" = "Pausar análisis automáticos; la actualización manual sigue disponible";
+"refresh.now.help" = "Analizar todas las unidades ahora (⌘R)";

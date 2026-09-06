@@ -115,3 +115,11 @@
 "history.details" = "À propos des valeurs";
 "refresh.segment.help" = "Actualiser automatiquement ou mettre en pause pour des analyses manuelles.";
 "window.minimize" = "Réduire";
+"history.range.help" = "Afficher les %d derniers jours calendaires";
+"history.range.general" = "Choisir 7, 30 ou 90 jours calendaires";
+"history.details.help" = "Expliquer les lacunes, jours partiels et limites des jours";
+"history.hours" = "%.1f heures observées";
+"history.estimated" = "Intervalle à minuit réparti proportionnellement";
+"history.no_measurement" = "Aucune mesure pour ce jour";
+"refresh.pause.help" = "Suspendre les analyses automatiques ; l’actualisation manuelle reste disponible";
+"refresh.now.help" = "Analyser tous les disques maintenant (⌘R)";

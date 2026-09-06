@@ -115,3 +115,11 @@
 "history.details" = "Wie wird gemessen?";
 "refresh.segment.help" = "Automatisch aktualisieren oder mit Pause nur manuell scannen.";
 "window.minimize" = "Minimieren";
+"history.range.help" = "Die letzten %d Kalendertage anzeigen";
+"history.range.general" = "Zeitraum wählen: 7, 30 oder 90 Kalendertage";
+"history.details.help" = "Erklärung zu Messlücken, Teilzeiträumen und Tagesgrenzen öffnen";
+"history.hours" = "%.1f Stunden erfasst";
+"history.estimated" = "Mitternachtsintervall anteilig verteilt";
+"history.no_measurement" = "Keine Messung an diesem Tag";
+"refresh.pause.help" = "Automatische Messung pausieren; manuelles Aktualisieren bleibt möglich";
+"refresh.now.help" = "Alle Laufwerke jetzt neu auslesen (⌘R)";

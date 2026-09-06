@@ -50,9 +50,10 @@ struct ContentView: View {
                         Picker(loc("refresh.interval"), selection: $model.refreshInterval) {
                             Image(systemName: "pause.fill").tag(0.0)
                                 .accessibilityLabel(loc("refresh.manual"))
-                            Text("30 s").tag(30.0)
-                            Text("1 min").tag(60.0)
-                            Text("5 min").tag(300.0)
+                                .help(loc("refresh.pause.help"))
+                            Text("30 s").tag(30.0).help(loc("refresh.30s"))
+                            Text("1 min").tag(60.0).help(loc("refresh.1m"))
+                            Text("5 min").tag(300.0).help(loc("refresh.5m"))
                         }
                         .pickerStyle(.segmented).labelsHidden()
                         .help(loc("refresh.segment.help"))
@@ -114,6 +115,7 @@ struct ContentView: View {
             .modifier(NativeCircleAction())
             Button { model.refresh() } label: { Label(loc("button.refresh.help"), systemImage: "arrow.clockwise") }
                 .disabled(model.isLoading || model.isDemo)
+                .help(loc("refresh.now.help"))
                 .modifier(NativeCircleAction())
         }
     }
@@ -163,7 +165,6 @@ struct AppearanceToggle: View {
                 Label(loc("appearance.system"), systemImage: "desktopcomputer")
             }
         }
-        .help(loc("appearance.help"))
     }
     private func option(_ appearance: AppAppearance, symbol: String) -> some View {
         let selected = appearance.colorScheme == colorScheme
@@ -183,6 +184,7 @@ struct AppearanceToggle: View {
                 }
         }
         .buttonStyle(.plain)
+        .help(appearance.label + " · " + loc("appearance.help"))
         .accessibilityLabel(appearance.label)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }

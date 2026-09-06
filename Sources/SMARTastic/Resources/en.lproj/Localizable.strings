@@ -115,3 +115,11 @@
 "history.details" = "About these values";
 "refresh.segment.help" = "Refresh automatically, or pause for manual scans only.";
 "window.minimize" = "Minimize";
+"history.range.help" = "Show the last %d calendar days";
+"history.range.general" = "Choose 7, 30 or 90 calendar days";
+"history.details.help" = "Explain measurement gaps, partial days and day boundaries";
+"history.hours" = "%.1f hours observed";
+"history.estimated" = "Midnight interval split proportionally";
+"history.no_measurement" = "No measurement for this day";
+"refresh.pause.help" = "Pause automatic scans; manual refresh remains available";
+"refresh.now.help" = "Scan all drives now (⌘R)";

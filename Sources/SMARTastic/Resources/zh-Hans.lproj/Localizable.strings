@@ -115,3 +115,11 @@
 "history.details" = "关于这些数值";
 "refresh.segment.help" = "自动刷新，或暂停后仅手动扫描。";
 "window.minimize" = "最小化";
+"history.range.help" = "显示最近 %d 个日历日";
+"history.range.general" = "选择 7、30 或 90 个日历日";
+"history.details.help" = "了解测量间隔、部分日期和日期边界";
+"history.hours" = "已观测 %.1f 小时";
+"history.estimated" = "跨午夜间隔按比例分配";
+"history.no_measurement" = "此日期没有测量数据";
+"refresh.pause.help" = "暂停自动扫描；仍可手动刷新";
+"refresh.now.help" = "立即扫描所有驱动器 (⌘R)";

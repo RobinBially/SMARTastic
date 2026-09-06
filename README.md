@@ -61,7 +61,9 @@ agent when the app is quit. ⌘W minimizes the window so measurement can continu
 The chart shows measured GB, not extrapolated full-day totals. Missing days stay
 empty; an observed zero is shown as a dot. Today's value and other partially
 observed days are incomplete. Select a bar to see its measured amount and covered
-hours. Short intervals crossing midnight (up to 10 minutes) are split in proportion
+hours. Hover over the chart for a floating daily detail card, including explicit
+missing-data messages. Click to pin a day; click it again to clear the selection.
+Buttons and period controls include contextual tooltips. Short intervals crossing midnight (up to 10 minutes) are split in proportion
 to elapsed time. Longer intervals crossing days are reported separately rather
 than assigned to invented daily totals. Their entire volume is reported if the
 interval overlaps the selected period, so it may include writes outside that period.
