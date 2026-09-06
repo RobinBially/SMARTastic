@@ -26,7 +26,7 @@ args.output.write_text(f'''cask "smartastic" do
   homepage "https://github.com/RobinBially/SMARTastic"
 
   depends_on formula: "smartmontools"
-  depends_on macos: ">= :sonoma"
+  depends_on macos: :sonoma
 
   app "SMARTastic.app"
 end
