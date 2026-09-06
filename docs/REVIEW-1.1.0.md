@@ -70,7 +70,8 @@ concrete findings were checked against code, tests and, where available, hardwar
 - Shell syntax and Python syntax checked. Pinned GitHub Action commits exist.
 - GitHub Actions with Xcode 26.3 passed tests and built Universal. Its first
   architecture-verification step exposed a lipo argument-order compatibility
-  issue; the file argument now precedes -verify_arch in all scripts.
+  issue. All scripts now verify the portable lipo -archs output through the
+  shared check-architectures.sh helper.
 
 ## Limits and pending distribution
 
