@@ -3,12 +3,13 @@ import PackageDescription
 
 let package = Package(
     name: "SMARTastic",
-    defaultLocalization: "de",
+    defaultLocalization: "en",
     platforms: [.macOS(.v14)],
     targets: [
         .executableTarget(
             name: "SMARTastic",
             resources: [.process("Resources")]
-        )
+        ),
+        .testTarget(name: "SMARTasticTests", dependencies: ["SMARTastic"])
     ]
 )

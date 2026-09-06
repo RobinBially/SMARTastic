@@ -1,57 +1,129 @@
+<p align="center"><img src="assets/logo.png" alt="SMARTastic logo" width="128"></p>
+
 # SMARTastic
 
-Native macOS app for visualizing SSD and HDD SMART data.
+A native macOS app for understanding the health of your SSDs and hard drives.
+Built with SwiftUI, powered by [smartmontools](https://www.smartmontools.org/),
+and developed by [Robin Bially](https://github.com/RobinBially).
 
-<p align="center">
-  <img src="https://img.shields.io/badge/macOS-14%2B-blue?logo=apple" alt="macOS">
-  <img src="https://img.shields.io/badge/Swift-6-orange?logo=swift" alt="Swift">
-  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT">
+<p>
+  <img src="https://img.shields.io/badge/macOS-14%2B-blue?logo=apple" alt="macOS 14 or later">
+  <img src="https://img.shields.io/badge/SwiftUI-native-orange?logo=swift" alt="Native SwiftUI app">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license">
 </p>
 
----
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/screenshot-dark.png">
+  <img src="assets/screenshot-light.png" alt="SMARTastic showing an NVMe SSD's health, temperature, remaining rated endurance and usage" width="1100">
+</picture>
 
-<p align="center">
-  <img src="assets/screenshot.png" alt="SMARTastic Screenshot" width="720">
-</p>
+*Actual app screenshots, using clearly labelled synthetic demo data.*
 
-**SMARTastic** shows drive health at a glance — temperature, wear, errors, TB written, and estimated remaining life. Built with SwiftUI, powered by `smartctl`.
+## What it shows
 
-## Features
+- **Internal and external drives**, including Apple SSDs, NVMe drives and ATA disks.
+- **Clear health states:** good, warning, critical or unknown. Failed SMART status,
+  NVMe critical warnings and depleted endurance are never hidden by a green score.
+- **Available measurements:** temperature, rated endurance, spare capacity,
+  media/sector error counters, data read/written, power-on hours and power cycles.
+- **Drive search** by model or interface, with native keyboard selection.
+- **Refresh controls:** manual, every 30 seconds, every minute (default), or every
+  five minutes. The last successful scan time stays visible.
+- **JSON report export** with a versioned schema and measurement timestamp.
+  Serial-number fields are omitted; review diagnostic text before sharing.
+- **Read diagnostics** and useful guidance when smartmontools or SMART access is
+  unavailable. A failed scan preserves the previous snapshot and shows a warning.
+- **Compact layout and native circular actions**, with content scrolling beneath
+  the transparent window header.
+- **A sun/moon appearance switch**, with system appearance by default (right-click
+  the switch to restore it), plus English, German, French, Spanish and
+  Simplified Chinese translations selected from your system preferences.
 
-- **NVMe SSDs & ATA HDDs** — Full SMART data where available
-- **Health gauges** — Temperature, spare, media errors, usage
-- **Usage stats** — Data read/written, daily write rate, power-on hours
-- **Life estimate** — Based on current wear rate
-- **Auto-refresh** — Every 30 seconds
-- **Color-coded** — Green/orange/red at a glance
+<img src="assets/screenshot-warning.png" alt="SMARTastic showing an HDD with sector warnings and unavailable measurements displayed as dashes" width="1100">
 
-## Requirements
+## Install
 
-- macOS 14+
-- `brew install smartmontools`
+Requires **macOS 14 Sonoma or later** and **smartmontools 7 or later**.
+The app supports Apple Silicon and Intel. Homebrew distribution uses the
+[LocalFoundry tap](https://github.com/localfoundry/homebrew-tap).
 
-## Quick Start
+The release pipeline and cask are prepared for version **1.1.0**. Until the first
+signed and notarized release is published to the tap, use the source-build steps
+below. Do not install an unsigned development build as a trusted public release.
 
-```bash
+The intended Homebrew command after publication is:
+
+```sh
+brew install --cask localfoundry/tap/smartastic
+```
+
+The cask also installs smartmontools. For a manual app download from
+[GitHub Releases](https://github.com/RobinBially/SMARTastic/releases), install
+smartmontools separately:
+
+```sh
+brew install smartmontools
+```
+
+SMARTastic looks for smartctl at `/opt/homebrew/bin/smartctl` on Apple Silicon
+and `/usr/local/bin/smartctl` on Intel. It does not ask for administrator access,
+install a privileged helper, start disk self-tests, or change drive settings.
+
+## Understanding the numbers
+
+SMART reports what a drive and its controller expose. USB adapters, RAID
+controllers and access permissions can prevent some or all SMART data from being
+read. The app still shows the available macOS drive information.
+
+**A dash means unavailable, not zero.** ATA attribute meanings vary by vendor;
+unsupported SSD wear and traffic counters are not guessed. For NVMe, one data
+unit is 512,000 bytes, and TB/GB use decimal units. ATA error counts aggregate
+reported reallocated, pending and offline-uncorrectable counters; categories can
+overlap and are not a count of distinct failing sectors.
+
+**Remaining rated endurance is not a lifespan prediction.** It is 100 minus the
+manufacturer's wear indicator, clamped at zero. The average write rate is based
+on powered-on time rather than calendar days. The previous calendar lifespan
+forecast and arbitrary HDD health percentage have been removed because they
+suggested more certainty than SMART provides.
+
+A good SMART result cannot rule out a sudden failure. Keep backups regardless of
+the displayed status. SMARTastic makes no network requests; reports are saved
+only to the destination you choose.
+
+## Build from source
+
+Use full **Xcode 26.3 or later** and its command-line tools. If the selected
+Command Line Tools SDK lacks the SwiftUI macro plugin, select full Xcode or set
+`DEVELOPER_DIR` for the build; see [release documentation](docs/RELEASING.md).
+
+```sh
 brew install smartmontools
 git clone https://github.com/RobinBially/SMARTastic.git
 cd SMARTastic
-swift build
-bash scripts/make-app.sh
-open SMARTastic.app
+swift test
+./scripts/make-app.sh
+open .build/app/SMARTastic.app
 ```
 
-Or download from [Releases](https://github.com/RobinBially/SMARTastic/releases).
+The script creates a release build for the current architecture and signs it ad
+hoc for local development. To build both architectures:
 
-## How it works
+```sh
+ARCHS="arm64 x86_64" ./scripts/make-app.sh
+```
 
-| Interface | Data shown |
-|-----------|-----------|
-| **Sidebar** | All drives with health status, temperature, usage |
-| **Detail** | Health overview, usage metrics, life prognosis, drive info |
+Launch a synthetic demo for screenshots (no drive reads):
 
-HDDs behind USB bridges that don't pass SMART commands show basic info (model, size) with a note that SMART is unavailable.
+```sh
+open .build/app/SMARTastic.app --args --demo --light -AppleLanguages '(en)'
+# Use the Appearance switch for System, Light or Dark.
+```
+
+Build, signing, notarization, release resumption and Homebrew maintenance are
+covered in [docs/RELEASING.md](docs/RELEASING.md). The review findings and actual
+verification scope are recorded in [docs/REVIEW-1.1.0.md](docs/REVIEW-1.1.0.md).
 
 ## License
 
-MIT
+[MIT](LICENSE).

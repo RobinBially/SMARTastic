@@ -1,340 +1,93 @@
 import Foundation
+import Darwin
+
+struct ScanResult {
+    var disks: [DiskInfo]
+    var warning: String?
+}
 
 actor SmartCtlService {
     static let shared = SmartCtlService()
-    private let smartctl = "/opt/homebrew/bin/smartctl"
 
-    private init() {}
-
-    func scan() throws -> [DiskInfo] {
-        var bySerial: [String: DiskInfo] = [:]
-
-        // 1) NVMe via smartctl --scan (IOService paths)
-        if let scan = try? run(smartctl, "--scan") {
-            for line in scan.components(separatedBy: .newlines) where line.contains("NVMe") {
-                if let range = line.range(of: " -d nvme") {
-                    let path = String(line[..<range.lowerBound])
-                    if let info = parseNVMe(device: path) {
-                        if !info.model.contains("APPLE") {
-                            bySerial[info.serial] = info
-                        }
-                    }
+    func scan() throws -> ScanResult {
+        let smartctl = ["/opt/homebrew/bin/smartctl", "/usr/local/bin/smartctl", "/usr/bin/smartctl"]
+            .first { FileManager.default.isExecutableFile(atPath: $0) }
+        let listing = try CommandRunner.run("/usr/sbin/diskutil", ["list", "-plist", "physical"])
+        guard listing.status == 0,
+              let plist = try PropertyListSerialization.propertyList(from: listing.data, format: nil) as? [String: Any],
+              let devices = plist["WholeDisks"] as? [String] else {
+            throw SmartCtlError.commandFailed(loc("error.discovery"))
+        }
+        var disks: [DiskInfo] = []
+        var warnings: [String] = []
+        if smartctl == nil { warnings.append(loc("error.install")) }
+        for identifier in devices {
+            let device = "/dev/" + identifier
+            do {
+                let result = try CommandRunner.run("/usr/sbin/diskutil", ["info", "-plist", device])
+                guard result.status == 0,
+                      let info = try PropertyListSerialization.propertyList(from: result.data, format: nil) as? [String: Any] else {
+                    throw SmartCtlError.commandFailed(loc("error.discovery"))
                 }
-            }
+                var disk = DiskInfo(id: device, model: info["MediaName"] as? String ?? identifier,
+                                    serial: info["SerialNumber"] as? String,
+                                    capacityBytes: SmartParser.number(info["TotalSize"]),
+                                    driveType: (info["SolidState"] as? Bool).map { $0 ? .ssd : .hdd } ?? .unknown,
+                                    interface: info["BusProtocol"] as? String ?? "—")
+                if let smartctl {
+                    do {
+                        let output = try CommandRunner.run(smartctl, ["-a", "-j", device])
+                        // smartctl uses a bitmask: nonzero often means valid data with health/read warnings.
+                        disk = try SmartParser.parse(output.data, device: device, fallback: disk)
+                        if output.status != 0 && disk.diagnostic == nil {
+                            disk.diagnostic = locf("error.exit_status", output.status)
+                        }
+                    } catch { disk.diagnostic = error.localizedDescription }
+                } else { disk.diagnostic = loc("error.install") }
+                disks.append(disk)
+            } catch { warnings.append("\(identifier): \(error.localizedDescription)") }
         }
-
-        // 2) External physical disks via diskutil
-        for dev in findPhysicalDisks() {
-            if let info = readDisk(device: dev) {
-                bySerial[info.serial] = info
-            }
-        }
-
-        return bySerial.values
-            .filter { !$0.model.contains("APPLE") }
-            .sorted { $0.model < $1.model }
+        return ScanResult(disks: disks.sorted { $0.model.localizedStandardCompare($1.model) == .orderedAscending },
+                          warning: warnings.isEmpty ? nil : warnings.joined(separator: "\n"))
     }
+}
 
-    // MARK: - Disk Discovery
+struct CommandOutput { let data: Data; let status: Int32 }
 
-    private func findPhysicalDisks() -> [String] {
-        var disks: [String] = []
-        for i in 0...20 {
-            let dev = "/dev/disk\(i)"
-            guard FileManager.default.isReadableFile(atPath: dev) else { continue }
-            guard let info = try? run("/usr/sbin/diskutil", "info", "-plist", dev) else { continue }
-            guard info.contains("<key>Virtual</key>") && info.contains("<false/>") else { continue }
-            disks.append(dev)
-        }
-        return disks
-    }
-
-    // MARK: - Disk Reader
-
-    private func readDisk(device: String) -> DiskInfo? {
-        if let output = try? run(smartctl, "-a", device) {
-            if output.contains("NVMe") {
-                return parseNVMe(device: device, output: output)
-            }
-            if output.contains("ATA") || output.contains("Device Model:") {
-                return parseATA(device: device, output: output)
-            }
-        }
-        return basicInfo(device: device)
-    }
-
-    private func basicInfo(device: String) -> DiskInfo? {
-        let ident = device.components(separatedBy: "/").last ?? "?"
-        let output = try? run("/usr/sbin/diskutil", "info", "-plist", device)
-        guard let data = output?.data(using: .utf8),
-              let dict = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
-        else {
-            return DiskInfo(
-                id: ident, model: "Unknown", serial: ident, firmware: "-",
-                size: "?", driveType: .unknown, interface: "?",
-                smartAvailable: false, smartPassed: false,
-                temperature: 0, percentageUsed: 0, availableSpare: 0,
-                dataReadTB: 0, dataWrittenTB: 0, powerOnHours: 0,
-                powerCycles: 0, unsafeShutdowns: 0, mediaErrors: 0
-            )
-        }
-
-        let model = (dict["MediaName"] as? String) ?? "Unknown"
-        let serial = (dict["SerialNumber"] as? String) ?? ident
-        let totalSize = (dict["TotalSize"] as? UInt64) ?? 0
-        let size = formatBytes("\(totalSize)")
-
-        return DiskInfo(
-            id: serial,
-            model: model,
-            serial: serial,
-            firmware: "-",
-            size: size,
-            driveType: .hdd,
-            interface: "USB",
-            smartAvailable: false,
-            smartPassed: false,
-            temperature: 0,
-            percentageUsed: 0,
-            availableSpare: 0,
-            dataReadTB: 0,
-            dataWrittenTB: 0,
-            powerOnHours: 0,
-            powerCycles: 0,
-            unsafeShutdowns: 0,
-            mediaErrors: 0
-        )
-    }
-
-    // MARK: - NVMe Parser
-
-    private func parseNVMe(device: String) -> DiskInfo? {
-        guard let output = try? run(smartctl, "-a", device) else { return nil }
-        return parseNVMe(device: device, output: output)
-    }
-
-    private func parseNVMe(device: String, output: String) -> DiskInfo {
-        let info = parseKeyValues(output)
-        let smart = parseSmartSection(output, marker: "SMART/Health Information")
-
-        let model = info["Model Number"] ?? "Unknown"
-        let serial = info["Serial Number"] ?? "-"
-        let fw = info["Firmware Version"] ?? "-"
-        let size = formatBytes(info["Total NVM Capacity"] ?? "-")
-
-        func d(_ key: String) -> Double? {
-            if let v = smart[key] ?? info[key] {
-                let s = v.replacingOccurrences(of: "[^0-9.,]", with: "", options: .regularExpression).replacingOccurrences(of: ",", with: ".")
-                return Double(s)
-            }
-            return nil
-        }
-        func i(_ key: String) -> Int? {
-            if let v = smart[key] ?? info[key] {
-                let s = v.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-                return Int(s)
-            }
-            return nil
-        }
-
-        return DiskInfo(
-            id: serial,
-            model: model,
-            serial: serial,
-            firmware: fw,
-            size: size,
-            driveType: .ssd,
-            interface: "NVMe",
-            smartAvailable: true,
-            smartPassed: output.contains("SMART overall-health self-assessment test result: PASSED"),
-            temperature: d("Temperature") ?? 0,
-            percentageUsed: d("Percentage Used") ?? 0,
-            availableSpare: d("Available Spare") ?? 100,
-            dataReadTB: parseDataUnits(smart["Data Units Read"] ?? "0"),
-            dataWrittenTB: parseDataUnits(smart["Data Units Written"] ?? "0"),
-            powerOnHours: i("Power On Hours") ?? 0,
-            powerCycles: i("Power Cycles") ?? 0,
-            unsafeShutdowns: i("Unsafe Shutdowns") ?? 0,
-            mediaErrors: i("Media and Data Integrity Errors") ?? 0
-        )
-    }
-
-    // MARK: - ATA Parser
-
-    private func parseATA(device: String, output: String) -> DiskInfo {
-        let info = parseKeyValues(output)
-        let attrs = parseATAattributes(output)
-
-        let model = info["Device Model"] ?? info["Model Number"] ?? "Unknown"
-        let serial = info["Serial Number"] ?? "-"
-        let fw = info["Firmware Version"] ?? info["Revision"] ?? "-"
-        let sizeRaw = info["User Capacity"] ?? info["Total NVM Capacity"] ?? "-"
-
-        let rotation = info["Rotation Rate"] ?? ""
-        let isHDD = rotation.contains("rpm")
-        let driveType: DriveType = isHDD ? .hdd : .ssd
-        let interface = info["SAT"] ?? info["ATA Version"] ?? "ATA"
-
-        let smartPassed = output.contains("SMART overall-health self-assessment test result: PASSED")
-            || output.contains("SMART Health Status: OK")
-
-        let tempRaw = attrs["194"]?.value ?? attrs["Temperature_Celsius"]?.value ?? "0"
-        let temp = Double(tempRaw) ?? 0
-
-        let pohRaw = attrs["9"]?.value ?? attrs["Power_On_Hours"]?.value ?? "0"
-        let poh = Int(pohRaw) ?? 0
-
-        let cyclesRaw = attrs["12"]?.value ?? attrs["Power_Cycle_Count"]?.value ?? "0"
-        let cycles = Int(cyclesRaw) ?? 0
-
-        let reallocRaw = attrs["5"]?.raw ?? attrs["Reallocated_Sector_Ct"]?.raw ?? "0"
-        let realloc = Int(reallocRaw) ?? 0
-
-        let pendingRaw = attrs["197"]?.raw ?? attrs["Current_Pending_Sector"]?.raw ?? "0"
-        let pending = Int(pendingRaw) ?? 0
-
-        let mediaErrors = realloc + pending
-        let size = formatBytes(sizeRaw)
-
-        return DiskInfo(
-            id: serial,
-            model: model,
-            serial: serial,
-            firmware: fw,
-            size: size,
-            driveType: driveType,
-            interface: interface,
-            smartAvailable: true,
-            smartPassed: smartPassed,
-            temperature: temp,
-            percentageUsed: 0,
-            availableSpare: 100,
-            dataReadTB: 0,
-            dataWrittenTB: 0,
-            powerOnHours: poh,
-            powerCycles: cycles,
-            unsafeShutdowns: 0,
-            mediaErrors: mediaErrors
-        )
-    }
-
-    // MARK: - ATA Attribute Parser
-
-    private struct ATAAttr {
-        let name: String
-        let value: String
-        let worst: String
-        let threshold: String
-        let raw: String
-    }
-
-    private func parseATAattributes(_ text: String) -> [String: ATAAttr] {
-        var attrs: [String: ATAAttr] = [:]
-        guard let headerRange = text.range(of: "Vendor Specific SMART Attributes with Thresholds") else { return attrs }
-
-        let slice = text[headerRange.upperBound...]
-        guard let firstNewline = slice.firstIndex(of: "\n") else { return attrs }
-        let block = text[text.index(after: firstNewline)...]
-        guard let footerRange = block.range(of: "\n\n") else { return attrs }
-        let attrBlock = block[..<footerRange.lowerBound]
-
-        for line in attrBlock.components(separatedBy: .newlines) {
-            let parts = line.split(separator: " ", omittingEmptySubsequences: true)
-            guard parts.count >= 10, let _ = Int(parts[0]) else { continue }
-            let id = String(parts[0])
-            let name = parts[1...].dropLast(5).joined(separator: " ")
-            let val = String(parts[parts.count - 5])
-            let worst = String(parts[parts.count - 4])
-            let thresh = String(parts[parts.count - 3])
-            let raw = String(parts[parts.count - 1])
-            let attr = ATAAttr(name: name, value: val, worst: worst, threshold: thresh, raw: raw)
-            attrs[id] = attr
-            attrs[name] = attr
-        }
-        return attrs
-    }
-
-    // MARK: - Shared Parsers
-
-    private func parseKeyValues(_ text: String) -> [String: String] {
-        var dict: [String: String] = [:]
-        for line in text.components(separatedBy: .newlines) {
-            if let colon = line.firstIndex(of: ":") {
-                let key = line[..<colon].trimmingCharacters(in: .whitespaces)
-                var val = line[line.index(after: colon)...].trimmingCharacters(in: .whitespaces)
-                if val.hasPrefix("[") { val = String(val.dropFirst()) }
-                if val.hasSuffix("]") { val = String(val.dropLast()) }
-                dict[key] = val
-            }
-        }
-        return dict
-    }
-
-    private func parseSmartSection(_ text: String, marker: String) -> [String: String] {
-        guard let range = text.range(of: marker) else { return [:] }
-        return parseKeyValues(String(text[range.lowerBound...]))
-    }
-
-    private func parseDataUnits(_ raw: String) -> Double {
-        let parts = raw.components(separatedBy: "[").map { $0.trimmingCharacters(in: .whitespaces) }
-        if parts.count >= 2 {
-            let inner = parts[1]
-                .replacingOccurrences(of: "]", with: "")
-                .replacingOccurrences(of: "TB", with: "")
-                .replacingOccurrences(of: "GB", with: "")
-                .trimmingCharacters(in: .whitespaces)
-                .replacingOccurrences(of: ",", with: ".")
-            if let val = Double(inner) {
-                return parts[1].contains("GB") ? val / 1000 : val
-            }
-        }
-        if let first = parts.first, let val = Double(first) {
-            return val * 512.0 / 1_000_000_000_000.0
-        }
-        return 0
-    }
-
-    private func formatBytes(_ raw: String) -> String {
-        let cleaned = raw
-            .replacingOccurrences(of: "[^0-9.,]", with: "", options: .regularExpression)
-            .replacingOccurrences(of: ",", with: ".")
-        guard let bytes = Double(cleaned) else { return raw }
-        let tb = bytes / 1_000_000_000_000
-        if tb >= 1 { return String(format: "%.2f TB", tb) }
-        let gb = bytes / 1_000_000_000
-        return String(format: "%.1f GB", gb)
-    }
-
-    private func run(_ args: String...) throws -> String {
+enum CommandRunner {
+    /// File-backed output prevents pipe-buffer deadlocks; each command has a hard deadline.
+    static func run(_ executable: String, _ arguments: [String], timeout: TimeInterval = 12) throws -> CommandOutput {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true,
+                                               attributes: [.posixPermissions: 0o700])
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let outputURL = directory.appendingPathComponent("output")
+        FileManager.default.createFile(atPath: outputURL.path, contents: nil, attributes: [.posixPermissions: 0o600])
+        let handle = try FileHandle(forWritingTo: outputURL)
+        defer { try? handle.close() }
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: args[0])
-        process.arguments = Array(args.dropFirst())
-
-        let outputPipe = Pipe()
-        let errorPipe = Pipe()
-        process.standardOutput = outputPipe
-        process.standardError = errorPipe
-
+        process.executableURL = URL(fileURLWithPath: executable)
+        process.arguments = arguments
+        process.standardOutput = handle
+        // smartctl supplies diagnostics in JSON; diskutil failures get an actionable app error.
+        process.standardError = FileHandle.nullDevice
         try process.run()
-        process.waitUntilExit()
-
-        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-
-        if process.terminationStatus != 0 {
-            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
-            let err = String(data: errorData, encoding: .utf8) ?? "Unknown error"
-            throw SmartCtlError.commandFailed(err)
+        let deadline = ProcessInfo.processInfo.systemUptime + timeout
+        while process.isRunning && ProcessInfo.processInfo.systemUptime < deadline { Thread.sleep(forTimeInterval: 0.02) }
+        if process.isRunning {
+            process.terminate()
+            let grace = ProcessInfo.processInfo.systemUptime + 0.25
+            while process.isRunning && ProcessInfo.processInfo.systemUptime < grace { Thread.sleep(forTimeInterval: 0.01) }
+            if process.isRunning { kill(process.processIdentifier, SIGKILL) }
+            process.waitUntilExit()
+            throw SmartCtlError.commandFailed(locf("error.timeout", URL(fileURLWithPath: executable).lastPathComponent))
         }
-
-        return String(data: outputData, encoding: .utf8) ?? ""
+        process.waitUntilExit()
+        return CommandOutput(data: try Data(contentsOf: outputURL), status: process.terminationStatus)
     }
 }
 
 enum SmartCtlError: LocalizedError {
     case commandFailed(String)
-    var errorDescription: String? {
-        switch self {
-        case .commandFailed(let msg): return String(format: loc("smartctl_error"), msg)
-        }
-    }
+    var errorDescription: String? { if case .commandFailed(let message) = self { return message }; return nil }
 }
