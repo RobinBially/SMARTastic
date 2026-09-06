@@ -69,7 +69,7 @@
 "remaining_years_days" = "≈%1$lld 年 %2$lld 天";
 "report.export" = "导出报告";
 "report.failed" = "导出失败";
-"report.help" = "导出不含序列号的 JSON 报告";
+"report.help" = "导出报告 — 将当前驱动器数据保存为 JSON 文件，不包含序列号。";
 "scan.loading" = "正在读取磁盘信息…";
 "search.empty" = "没有匹配的磁盘";
 "search.placeholder" = "搜索磁盘";
@@ -122,4 +122,4 @@
 "history.estimated" = "跨午夜间隔按比例分配";
 "history.no_measurement" = "此日期没有测量数据";
 "refresh.pause.help" = "暂停自动扫描；仍可手动刷新";
-"refresh.now.help" = "立即扫描所有驱动器 (⌘R)";
+"refresh.now.help" = "刷新 (⌘R) — 重新读取所有驱动器的最新数据。";

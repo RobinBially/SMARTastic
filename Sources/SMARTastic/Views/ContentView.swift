@@ -111,12 +111,12 @@ struct ContentView: View {
                 catch { exportError = error.localizedDescription }
             } label: { Label(loc("report.export"), systemImage: "square.and.arrow.up") }
             .disabled(model.disks.isEmpty || model.isLoading)
-            .help(loc("report.help"))
             .modifier(NativeCircleAction())
+            .help(loc("report.help"))
             Button { model.refresh() } label: { Label(loc("button.refresh.help"), systemImage: "arrow.clockwise") }
                 .disabled(model.isLoading || model.isDemo)
-                .help(loc("refresh.now.help"))
                 .modifier(NativeCircleAction())
+                .help(loc("refresh.now.help"))
         }
     }
     private func notice(_ text: String, icon: String, color: Color) -> some View {

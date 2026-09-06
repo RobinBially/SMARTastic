@@ -69,7 +69,7 @@
 "remaining_years_days" = "≈%1$lld a %2$lld j";
 "report.export" = "Exporter le rapport";
 "report.failed" = "Échec de l’export";
-"report.help" = "Exporter en JSON sans numéros de série";
+"report.help" = "Exporter le rapport – enregistrer les données actuelles des disques dans un fichier JSON, sans numéros de série.";
 "scan.loading" = "Lecture des disques…";
 "search.empty" = "Aucun disque correspondant";
 "search.placeholder" = "Rechercher un disque";
@@ -122,4 +122,4 @@
 "history.estimated" = "Intervalle à minuit réparti proportionnellement";
 "history.no_measurement" = "Aucune mesure pour ce jour";
 "refresh.pause.help" = "Suspendre les analyses automatiques ; l’actualisation manuelle reste disponible";
-"refresh.now.help" = "Analyser tous les disques maintenant (⌘R)";
+"refresh.now.help" = "Actualiser (⌘R) – relire les valeurs actuelles de tous les disques.";

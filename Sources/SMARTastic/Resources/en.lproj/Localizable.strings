@@ -69,7 +69,7 @@
 "remaining_years_days" = "≈%1$lld yr %2$lld days";
 "report.export" = "Export report";
 "report.failed" = "Export failed";
-"report.help" = "Export a JSON snapshot without serial numbers";
+"report.help" = "Export report – save the current drive data as a JSON file, without serial numbers.";
 "scan.loading" = "Reading drive information…";
 "search.empty" = "No matching drives";
 "search.placeholder" = "Search drives";
@@ -122,4 +122,4 @@
 "history.estimated" = "Midnight interval split proportionally";
 "history.no_measurement" = "No measurement for this day";
 "refresh.pause.help" = "Pause automatic scans; manual refresh remains available";
-"refresh.now.help" = "Scan all drives now (⌘R)";
+"refresh.now.help" = "Refresh (⌘R) – read the latest values from all drives.";

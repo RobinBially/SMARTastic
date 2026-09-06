@@ -69,7 +69,7 @@
 "remaining_years_days" = "≈%1$lld J. %2$lld T.";
 "report.export" = "Bericht exportieren";
 "report.failed" = "Export fehlgeschlagen";
-"report.help" = "JSON-Bericht ohne Seriennummern exportieren";
+"report.help" = "Bericht exportieren – speichert die aktuellen Laufwerksdaten als JSON-Datei, ohne Seriennummern.";
 "scan.loading" = "Laufwerksdaten werden gelesen …";
 "search.empty" = "Keine passenden Laufwerke";
 "search.placeholder" = "Laufwerke suchen";
@@ -122,4 +122,4 @@
 "history.estimated" = "Mitternachtsintervall anteilig verteilt";
 "history.no_measurement" = "Keine Messung an diesem Tag";
 "refresh.pause.help" = "Automatische Messung pausieren; manuelles Aktualisieren bleibt möglich";
-"refresh.now.help" = "Alle Laufwerke jetzt neu auslesen (⌘R)";
+"refresh.now.help" = "Aktualisieren (⌘R) – liest die aktuellen Werte aller Laufwerke neu aus.";

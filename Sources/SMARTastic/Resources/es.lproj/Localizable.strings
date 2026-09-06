@@ -69,7 +69,7 @@
 "remaining_years_days" = "≈%1$lld a %2$lld d";
 "report.export" = "Exportar informe";
 "report.failed" = "Error al exportar";
-"report.help" = "Exportar JSON sin números de serie";
+"report.help" = "Exportar informe – guardar los datos actuales de las unidades en un archivo JSON, sin números de serie.";
 "scan.loading" = "Leyendo las unidades…";
 "search.empty" = "No hay coincidencias";
 "search.placeholder" = "Buscar unidades";
@@ -122,4 +122,4 @@
 "history.estimated" = "Intervalo de medianoche repartido proporcionalmente";
 "history.no_measurement" = "Sin mediciones para este día";
 "refresh.pause.help" = "Pausar análisis automáticos; la actualización manual sigue disponible";
-"refresh.now.help" = "Analizar todas las unidades ahora (⌘R)";
+"refresh.now.help" = "Actualizar (⌘R) – volver a leer los valores actuales de todas las unidades.";
