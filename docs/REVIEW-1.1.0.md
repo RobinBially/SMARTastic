@@ -23,6 +23,7 @@ concrete findings were checked against code, tests and, where available, hardwar
 | R8 | During the overhaul, blindly adding ATA attribute 198 treated Host_Reads_GiB on some healthy SSDs as errors. | Use smartctl's named attribute semantics. Regression test covers the vendor read counter; confirmed against smartmontools' drive database. |
 | R9 | Packaging copied debug output and put resources at the bundle root; there was no trusted release signature. | Versioned release build, embedded Resources bundle resolver, Universal binary, Developer ID signing with Hardened Runtime and timestamp. Both architectures checked. |
 | R10 | The initial release workflow could not resume after Apple timeout or a later tap failure. | Restore the same submission and original build number; recover executable modes from submission ZIP. Existing public releases are matched to the exact source commit, verified and continued at the tap step. |
+| R11 | Lifetime written bytes divided by SMART power-on hours and multiplied by 24 was labelled GB/day. NVMe power-on hours can exclude low-power states, making a calendar-day interpretation misleading. | Retained the normalized volume with the explicit label “Written per 24 SMART hours” and explanatory tooltips. Tests verify the normalization and unavailable/zero-hour cases. A true calendar-day average requires timestamped counter differences. Field semantics checked against the [libnvme SMART log documentation](https://manpages.debian.org/testing/libnvme-dev/nvme_smart_log.2.en.html). |
 
 ## UI and documentation corrections
 

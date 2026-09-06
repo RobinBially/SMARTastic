@@ -66,9 +66,10 @@ struct DiskInfo: Identifiable, Hashable, Codable {
     }
     var healthColor: Color { health.color }
     var remainingEndurance: Double? { percentageUsed.map { max(0, 100 - $0) } }
-    var dailyWriteGB: Double? {
+    /// Lifetime write volume normalized to 24 drive-reported hours, not calendar time.
+    var writtenGBPer24PowerOnHours: Double? {
         guard let hours = powerOnHours, hours > 0, let written = dataWrittenTB else { return nil }
-        return written * 1000 / (Double(hours) / 24)
+        return written * 1000 / Double(hours) * 24
     }
     var tempColor: Color {
         guard let temperature else { return .secondary }

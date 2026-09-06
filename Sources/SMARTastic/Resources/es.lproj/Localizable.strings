@@ -7,7 +7,6 @@
 "button.scan" = "Escanear";
 "data.disclaimer" = "— indica que la unidad no informó de este valor. SMART no garantiza la ausencia de fallos.";
 "demo.notice" = "Demo · Unidades y datos ficticios";
-"detail.avg_write_rate" = "Tasa de escritura media";
 "detail.life_consumed" = "Vida consumida";
 "detail.no_selection" = "Selecciona una unidad";
 "detail.power_cycles" = "Ciclos de encendido";
@@ -18,7 +17,7 @@
 "disk_count_other" = "%lld unidades";
 "empty.help" = "Conecta una unidad y vuelve a analizar. El acceso SMART depende de la unidad y del controlador.";
 "empty.no_drives" = "No se encontraron unidades";
-"endurance.explanation" = "La resistencia restante es 100 menos el desgaste indicado por el fabricante. No predice fallos. La tasa de escritura usa el tiempo encendido, no los días naturales.";
+"endurance.explanation" = "La resistencia restante es 100 menos el desgaste indicado por el fabricante. No predice fallos.";
 "endurance.remaining" = "Resistencia restante";
 "endurance.title" = "Acerca de la resistencia SSD";
 "error.discovery" = "Error al detectar unidades. Reconecta la unidad y reintenta.";
@@ -48,7 +47,6 @@
 "label.health" = "Salud";
 "metric.media_errors_none" = "Sin errores";
 "metric.media_errors_some" = "Con errores";
-"metric.per_day" = "GB/día";
 "metric.power_cycles" = "Ciclos de encendido";
 "metric.power_cycles_detail" = "Reinicios";
 "metric.power_on_detail" = "horas";
@@ -95,3 +93,6 @@
 "appearance.light" = "Claro";
 "appearance.dark" = "Oscuro";
 "appearance.help" = "Clic derecho para usar la apariencia del sistema";
+"power_on.help" = "Horas indicadas por la unidad. Los controladores NVMe pueden excluir estados de bajo consumo; no equivalen a la edad natural de la unidad.";
+"detail.written_per_smart_day" = "Escrito por 24 horas SMART";
+"detail.written_per_smart_day.help" = "Volumen total escrito dividido por las horas de funcionamiento indicadas por la unidad, normalizado a 24 horas. Puede excluir periodos de bajo consumo; no equivale necesariamente a una media por día natural ni a la velocidad actual.";

@@ -7,7 +7,6 @@
 "button.scan" = "Scannen";
 "data.disclaimer" = "— bedeutet: Das Laufwerk liefert diesen Wert nicht. SMART kann einen Ausfall nicht ausschließen.";
 "demo.notice" = "Demo · Beispiel-Laufwerke mit fiktiven Daten";
-"detail.avg_write_rate" = "Durchschn. Schreibrate";
 "detail.life_consumed" = "Verbrauchte Lebensdauer";
 "detail.no_selection" = "Wähle ein Laufwerk aus";
 "detail.power_cycles" = "Power Cycles";
@@ -18,7 +17,7 @@
 "disk_count_other" = "%lld Laufwerke";
 "empty.help" = "Verbinde ein Laufwerk und starte einen Scan. Der SMART-Zugriff hängt von Laufwerk und Controller ab.";
 "empty.no_drives" = "Keine Laufwerke gefunden";
-"endurance.explanation" = "Die verbleibende Ausdauer ist 100 minus dem Verschleißwert des Herstellers. Sie sagt keinen Ausfallzeitpunkt voraus. Die Schreibrate basiert auf Betriebszeit, nicht auf Kalendertagen.";
+"endurance.explanation" = "Die verbleibende Ausdauer ist 100 minus dem Verschleißwert des Herstellers. Sie sagt keinen Ausfallzeitpunkt voraus.";
 "endurance.remaining" = "Rest-Ausdauer";
 "endurance.title" = "Zur SSD-Ausdauer";
 "error.discovery" = "Laufwerkserkennung fehlgeschlagen. Verbinde das Laufwerk erneut und wiederhole den Scan.";
@@ -48,7 +47,6 @@
 "label.health" = "Health";
 "metric.media_errors_none" = "Fehlerfrei";
 "metric.media_errors_some" = "Fehlerhaft";
-"metric.per_day" = "GB/Tag";
 "metric.power_cycles" = "Power Cycles";
 "metric.power_cycles_detail" = "Neustarts";
 "metric.power_on_detail" = "Stunden";
@@ -95,3 +93,6 @@
 "appearance.light" = "Hell";
 "appearance.dark" = "Dunkel";
 "appearance.help" = "Rechtsklick: Systemdarstellung verwenden";
+"power_on.help" = "Vom Laufwerk gemeldete Stunden. NVMe-Controller können Stromsparzeiten auslassen; der Wert entspricht nicht dem Kalenderalter des Laufwerks.";
+"detail.written_per_smart_day" = "Geschrieben je 24 SMART-Stunden";
+"detail.written_per_smart_day.help" = "Gesamte Schreibmenge geteilt durch die vom Laufwerk gemeldeten Betriebsstunden, auf 24 Stunden normiert. Stromsparzeiten können fehlen; das ist deshalb nicht zwingend ein Kalendertagesdurchschnitt oder die aktuelle Schreibgeschwindigkeit.";

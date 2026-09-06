@@ -7,7 +7,6 @@
 "button.scan" = "Analyser";
 "data.disclaimer" = "— signifie que le disque n’a pas fourni cette valeur. SMART ne garantit pas l’absence de panne.";
 "demo.notice" = "Démo · Disques et données fictifs";
-"detail.avg_write_rate" = "Taux d'écriture moyen";
 "detail.life_consumed" = "Durée de vie utilisée";
 "detail.no_selection" = "Sélectionnez un disque";
 "detail.power_cycles" = "Cycles d'alimentation";
@@ -18,7 +17,7 @@
 "disk_count_other" = "%lld disques";
 "empty.help" = "Connectez un disque et relancez une analyse. L’accès SMART dépend du disque et du contrôleur.";
 "empty.no_drives" = "Aucun disque trouvé";
-"endurance.explanation" = "L’endurance restante vaut 100 moins l’indicateur d’usure du fabricant. Elle ne prédit pas une panne. Le débit moyen utilise le temps sous tension, pas les jours calendaires.";
+"endurance.explanation" = "L’endurance restante vaut 100 moins l’indicateur d’usure du fabricant. Elle ne prédit pas une panne.";
 "endurance.remaining" = "Endurance restante";
 "endurance.title" = "À propos de l’endurance SSD";
 "error.discovery" = "La détection a échoué. Reconnectez le disque et réessayez.";
@@ -48,7 +47,6 @@
 "label.health" = "Santé";
 "metric.media_errors_none" = "Sans erreur";
 "metric.media_errors_some" = "Défectueux";
-"metric.per_day" = "GB/jour";
 "metric.power_cycles" = "Cycles d'alimentation";
 "metric.power_cycles_detail" = "Redémarrages";
 "metric.power_on_detail" = "heures";
@@ -95,3 +93,6 @@
 "appearance.light" = "Clair";
 "appearance.dark" = "Sombre";
 "appearance.help" = "Clic droit pour suivre l’apparence du système";
+"power_on.help" = "Heures indiquées par le disque. Les contrôleurs NVMe peuvent exclure les états de faible consommation ; ce n’est pas l’âge calendaire du disque.";
+"detail.written_per_smart_day" = "Écrit par 24 heures SMART";
+"detail.written_per_smart_day.help" = "Volume total écrit divisé par les heures de fonctionnement indiquées par le disque, ramené à 24 heures. Des périodes de faible consommation peuvent être exclues ; ce n’est pas nécessairement une moyenne par jour calendaire ni le débit actuel.";

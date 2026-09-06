@@ -32,6 +32,7 @@ struct DiskDetailView: View {
                             MetricTile(label: loc("metric.written"), value: metric(disk.dataWrittenTB, suffix: " TB", decimals: 2), icon: "arrow.down.to.line", color: .cyan)
                             MetricTile(label: loc("metric.read"), value: metric(disk.dataReadTB, suffix: " TB", decimals: 2), icon: "arrow.up.to.line", color: .cyan)
                             MetricTile(label: loc("metric.power_on_time"), value: metric(disk.powerOnHours), icon: "clock", detail: loc("metric.power_on_detail"))
+                                .help(loc("power_on.help"))
                             MetricTile(label: loc("metric.power_cycles"), value: metric(disk.powerCycles), icon: "power")
                         }
                     }
@@ -39,8 +40,10 @@ struct DiskDetailView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Label(loc("endurance.title"), systemImage: "info.circle").font(.subheadline.weight(.medium))
                             Text(loc("endurance.explanation")).font(.system(size: 13)).foregroundStyle(.secondary)
-                            if let daily = disk.dailyWriteGB {
-                                Text(loc("detail.avg_write_rate") + ": " + metric(daily, suffix: " " + loc("metric.per_day"), decimals: 1)).font(.system(size: 13))
+                            if let volume = disk.writtenGBPer24PowerOnHours {
+                                Text(loc("detail.written_per_smart_day") + ": " + metric(volume, suffix: " GB", decimals: 1))
+                                    .font(.system(size: 13))
+                                    .help(loc("detail.written_per_smart_day.help"))
                             }
                         }.padding(16).frame(maxWidth: .infinity, alignment: .leading).background(.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
                     }

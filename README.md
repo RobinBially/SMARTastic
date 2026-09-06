@@ -82,10 +82,13 @@ reported reallocated, pending and offline-uncorrectable counters; categories can
 overlap and are not a count of distinct failing sectors.
 
 **Remaining rated endurance is not a lifespan prediction.** It is 100 minus the
-manufacturer's wear indicator, clamped at zero. The average write rate is based
-on powered-on time rather than calendar days. The previous calendar lifespan
-forecast and arbitrary HDD health percentage have been removed because they
-suggested more certainty than SMART provides.
+manufacturer's wear indicator, clamped at zero. SMART power-on hours can exclude
+low-power states. “Written per 24 SMART hours” divides lifetime written bytes by
+the drive-reported power-on hours and normalizes to 24 hours. It is not necessarily
+a calendar-day average and is not the current write speed. A measured calendar-day
+average would require counter differences between timestamped observations.
+The calendar lifespan forecast and arbitrary HDD health percentage were removed
+because they suggested more certainty than SMART provides. See the [NVMe SMART log field definitions](https://manpages.debian.org/testing/libnvme-dev/nvme_smart_log.2.en.html).
 
 A good SMART result cannot rule out a sudden failure. Keep backups regardless of
 the displayed status. SMARTastic makes no network requests; reports are saved

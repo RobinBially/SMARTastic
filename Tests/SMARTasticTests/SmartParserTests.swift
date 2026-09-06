@@ -10,6 +10,7 @@ final class SmartParserTests: XCTestCase {
         XCTAssertEqual(disk.dataWrittenTB!, 1.024, accuracy: 0.000001)
         XCTAssertEqual(disk.dataReadTB!, 2.048, accuracy: 0.000001)
         XCTAssertEqual(disk.size, "2.00 TB")
+        XCTAssertEqual(try XCTUnwrap(disk.writtenGBPer24PowerOnHours), 24.576, accuracy: 0.000001)
         XCTAssertEqual(disk.temperature, 39)
         XCTAssertEqual(disk.health, .healthy)
         XCTAssertNotNil(disk.diagnostic)
@@ -45,6 +46,7 @@ final class SmartParserTests: XCTestCase {
         XCTAssertNil(disk.temperature)
         XCTAssertNil(disk.mediaErrors)
         XCTAssertNil(disk.remainingEndurance)
+        XCTAssertNil(disk.writtenGBPer24PowerOnHours)
     }
     func testMissingSerialsHaveSeparateDeviceIdentities() throws {
         XCTAssertNotEqual(try parse("{}", device: "/dev/disk21").id, try parse("{}", device: "/dev/disk22").id)
@@ -53,7 +55,8 @@ final class SmartParserTests: XCTestCase {
         let disk = try parse(#"{"nvme_smart_health_information_log":{"percentage_used":255,"power_on_hours":0,"data_units_written":0}}"#)
         XCTAssertEqual(disk.remainingEndurance, 0)
         XCTAssertEqual(disk.health, .critical)
-        XCTAssertNil(disk.dailyWriteGB)
+        XCTAssertEqual(disk.powerOnHours, 0)
+        XCTAssertNil(disk.writtenGBPer24PowerOnHours)
     }
     func testInvalidAndBooleanMetrics() throws {
         XCTAssertThrowsError(try parse("not json"))
