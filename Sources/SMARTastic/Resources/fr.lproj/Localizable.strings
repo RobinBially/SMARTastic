@@ -114,3 +114,4 @@
 "history.demo" = "Historique démo";
 "history.details" = "À propos des valeurs";
 "refresh.segment.help" = "Actualiser automatiquement ou mettre en pause pour des analyses manuelles.";
+"window.minimize" = "Réduire";

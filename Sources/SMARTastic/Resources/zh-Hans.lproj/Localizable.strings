@@ -114,3 +114,4 @@
 "history.demo" = "演示历史";
 "history.details" = "关于这些数值";
 "refresh.segment.help" = "自动刷新，或暂停后仅手动扫描。";
+"window.minimize" = "最小化";

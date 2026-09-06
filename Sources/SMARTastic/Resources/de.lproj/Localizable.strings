@@ -114,3 +114,4 @@
 "history.demo" = "Demo-Verlauf";
 "history.details" = "Wie wird gemessen?";
 "refresh.segment.help" = "Automatisch aktualisieren oder mit Pause nur manuell scannen.";
+"window.minimize" = "Minimieren";

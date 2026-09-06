@@ -18,6 +18,12 @@ struct SMARTasticApp: App {
         .defaultSize(width: 1120, height: 790)
         .windowResizability(.contentMinSize)
         .commands {
+            CommandGroup(replacing: .saveItem) {
+                Button(loc("window.minimize")) {
+                    (NSApp.keyWindow ?? NSApp.mainWindow)?.performMiniaturize(nil)
+                }
+                .keyboardShortcut("w", modifiers: .command)
+            }
             CommandGroup(after: .newItem) {
                 Button(loc("button.refresh.help")) { model.refresh() }
                     .keyboardShortcut("r")

@@ -114,3 +114,4 @@
 "history.demo" = "Demo history";
 "history.details" = "About these values";
 "refresh.segment.help" = "Refresh automatically, or pause for manual scans only.";
+"window.minimize" = "Minimize";

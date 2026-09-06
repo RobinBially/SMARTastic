@@ -55,7 +55,8 @@ and developed by [Robin Bially](https://github.com/RobinBially).
 History starts when this version first scans a drive. SMART only exposes a lifetime
 counter; it cannot reconstruct earlier daily usage. Keep SMARTastic open with
 periodic refresh enabled to collect regular measurements. There is no background
-agent when the app is quit.
+agent when the app is quit. ⌘W minimizes the window so measurement can continue;
+⌘Q quits the app. The standard ⌘M shortcut also remains available.
 
 The chart shows measured GB, not extrapolated full-day totals. Missing days stay
 empty; an observed zero is shown as a dot. Today's value and other partially
