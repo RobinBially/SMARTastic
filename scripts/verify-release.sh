@@ -10,7 +10,7 @@ trap 'rm -rf "$CHECK"' EXIT
 ditto -x -k "$OUTPUT/SMARTastic-$VERSION.zip" "$CHECK"
 APP="$CHECK/SMARTastic.app"
 test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")" = "$VERSION"
-lipo -verify_arch arm64 x86_64 "$APP/Contents/MacOS/SMARTastic"
+lipo "$APP/Contents/MacOS/SMARTastic" -verify_arch arm64 x86_64
 codesign --verify --deep --strict --verbose=2 "$APP"
 xcrun stapler validate "$APP"
 spctl --assess --type execute --verbose=4 "$APP"

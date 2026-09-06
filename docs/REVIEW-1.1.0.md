@@ -68,6 +68,9 @@ concrete findings were checked against code, tests and, where available, hardwar
   failed due to a missing SwiftUI macro plugin; full Xcode succeeded.
 - 11 offline Python regression tests cover release creation and recovery, including safe pre-build retries and refusing ambiguous submission state.
 - Shell syntax and Python syntax checked. Pinned GitHub Action commits exist.
+- GitHub Actions with Xcode 26.3 passed tests and built Universal. Its first
+  architecture-verification step exposed a lipo argument-order compatibility
+  issue; the file argument now precedes -verify_arch in all scripts.
 
 ## Limits and pending distribution
 

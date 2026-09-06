@@ -25,7 +25,7 @@ fi
 APP="$STATE/SMARTastic.app"
 if [[ ! -e "$STATE/submission.zip" ]]; then
     ARCHS="arm64 x86_64" ./scripts/make-app.sh "$STATE"
-    lipo -verify_arch arm64 x86_64 "$APP/Contents/MacOS/SMARTastic"
+    lipo "$APP/Contents/MacOS/SMARTastic" -verify_arch arm64 x86_64
     ditto -c -k --keepParent "$APP" "$STATE/submission.zip"
     (cd "$STATE" && shasum -a 256 submission.zip > submission.sha256)
 fi

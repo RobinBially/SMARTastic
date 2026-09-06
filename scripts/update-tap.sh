@@ -53,7 +53,7 @@ brew style localfoundry/tap/smartastic
 brew audit --cask --strict --online localfoundry/tap/smartastic
 brew install --cask localfoundry/tap/smartastic
 test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' /Applications/SMARTastic.app/Contents/Info.plist)" = "$VERSION"
-lipo -verify_arch arm64 x86_64 /Applications/SMARTastic.app/Contents/MacOS/SMARTastic
+lipo /Applications/SMARTastic.app/Contents/MacOS/SMARTastic -verify_arch arm64 x86_64
 codesign --verify --deep --strict /Applications/SMARTastic.app
 xcrun stapler validate /Applications/SMARTastic.app
 spctl --assess --type execute --verbose=4 /Applications/SMARTastic.app

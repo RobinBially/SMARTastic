@@ -24,5 +24,5 @@ jobs:
       - name: Check bundled resources and version
         run: |
           test -d .build/app/SMARTastic.app/Contents/Resources/SMARTastic_SMARTastic.bundle
-          lipo -verify_arch arm64 x86_64 .build/app/SMARTastic.app/Contents/MacOS/SMARTastic
+          lipo .build/app/SMARTastic.app/Contents/MacOS/SMARTastic -verify_arch arm64 x86_64
           codesign --verify --deep --strict .build/app/SMARTastic.app
