@@ -123,3 +123,5 @@
 "history.no_measurement" = "Keine Messung an diesem Tag";
 "refresh.pause.help" = "Automatische Messung pausieren; manuelles Aktualisieren bleibt möglich";
 "refresh.now.help" = "Aktualisieren (⌘R) – liest die aktuellen Werte aller Laufwerke neu aus.";
+"disclosure.expanded" = "Ausgeklappt";
+"disclosure.collapsed" = "Eingeklappt";

@@ -107,3 +107,17 @@ concrete findings were checked against code, tests and, where available, hardwar
 - Replaced the refresh dropdown with native pause/30-second/1-minute/5-minute
   segments. Refined the chart with blue gradients, a mint today bar and a collapsible
   explanation. Updated all five localizations and README history documentation.
+
+## Follow-up: optional logs, disclosure targets and search
+
+- Replaced `smartctl -a -j` with `-i -H -A -j`: the app needs drive identity,
+  health and attributes, not optional detailed error/self-test logs. On the Apple
+  SSD the old invocation returned status 4 with GetLogPage code 745; the targeted
+  invocation returned status 0 and the same set of NVMe health-counter fields.
+  Actual command failures remain visible; no diagnostic strings are suppressed.
+- Explanation and diagnostic headers now have a full-width, 36-point button
+  target, keyboard activation and an accessible expanded/collapsed state.
+- Escape clears the focused drive-search field.
+- Window action help uses explicit AppKit pointer tracking and visible cards;
+  Robin confirmed that these cards appear in the running app.
+- All 24 Swift tests passed with the hardware scan enabled after the command change.

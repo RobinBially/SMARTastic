@@ -123,3 +123,5 @@
 "history.no_measurement" = "此日期没有测量数据";
 "refresh.pause.help" = "暂停自动扫描；仍可手动刷新";
 "refresh.now.help" = "刷新 (⌘R) — 重新读取所有驱动器的最新数据。";
+"disclosure.expanded" = "已展开";
+"disclosure.collapsed" = "已折叠";

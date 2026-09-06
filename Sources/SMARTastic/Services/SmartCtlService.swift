@@ -36,7 +36,9 @@ actor SmartCtlService {
                                     interface: info["BusProtocol"] as? String ?? "—")
                 if let smartctl {
                     do {
-                        let output = try CommandRunner.run(smartctl, ["-a", "-j", device])
+                        // Identity, health and attributes include all displayed counters.
+                        // -a additionally requests optional logs that Apple NVMe can reject.
+                        let output = try CommandRunner.run(smartctl, ["-i", "-H", "-A", "-j", device])
                         // smartctl uses a bitmask: nonzero often means valid data with health/read warnings.
                         disk = try SmartParser.parse(output.data, device: device, fallback: disk)
                         if output.status != 0 && disk.diagnostic == nil {

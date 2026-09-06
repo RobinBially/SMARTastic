@@ -123,3 +123,5 @@
 "history.no_measurement" = "Sin mediciones para este día";
 "refresh.pause.help" = "Pausar análisis automáticos; la actualización manual sigue disponible";
 "refresh.now.help" = "Actualizar (⌘R) – volver a leer los valores actuales de todas las unidades.";
+"disclosure.expanded" = "Expandido";
+"disclosure.collapsed" = "Contraído";

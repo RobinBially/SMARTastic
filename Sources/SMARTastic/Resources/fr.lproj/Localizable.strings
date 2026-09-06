@@ -123,3 +123,5 @@
 "history.no_measurement" = "Aucune mesure pour ce jour";
 "refresh.pause.help" = "Suspendre les analyses automatiques ; l’actualisation manuelle reste disponible";
 "refresh.now.help" = "Actualiser (⌘R) – relire les valeurs actuelles de tous les disques.";
+"disclosure.expanded" = "Développé";
+"disclosure.collapsed" = "Réduit";

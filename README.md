@@ -29,12 +29,13 @@ and developed by [Robin Bially](https://github.com/RobinBially).
 - **Daily write history:** a native bar chart for 7, 30 or 90 days, with a today
   summary and selectable bars. Uses real timestamps and counter differences,
   independently of SMART power-on hours.
-- **Drive search** by model or interface, with native keyboard selection.
+- **Drive search** by model or interface, with native keyboard selection and
+  Escape to clear the focused search field.
 - **Refresh controls:** native segments for pause/manual, every 30 seconds,
   every minute (default), or every five minutes. The last successful scan time stays visible.
 - **JSON report export** with a versioned schema and measurement timestamp.
   Serial-number fields are omitted; review diagnostic text before sharing.
-- **Read diagnostics** and useful guidance when smartmontools or SMART access is
+- **Read diagnostics** with a full-width clickable disclosure row and useful guidance when smartmontools or SMART access is
   unavailable. A failed scan preserves the previous snapshot and shows a warning.
 - **Compact layout and native circular actions**, with content scrolling beneath
   the transparent window header.

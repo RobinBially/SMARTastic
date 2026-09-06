@@ -27,6 +27,7 @@ struct ContentView: View {
                     Spacer()
                 }.padding(18)
                 TextField(loc("search.placeholder"), text: $search)
+                    .onExitCommand { search = "" }
                     .textFieldStyle(.roundedBorder).padding(.horizontal, 16).padding(.bottom, 12)
                 List(selection: $model.selectedDiskID) {
                     Section(locf(model.disks.count == 1 ? "disk_count_one" : "disk_count_other", model.disks.count)) {
@@ -112,11 +113,11 @@ struct ContentView: View {
             } label: { Label(loc("report.export"), systemImage: "square.and.arrow.up") }
             .disabled(model.disks.isEmpty || model.isLoading)
             .modifier(NativeCircleAction())
-            .help(loc("report.help"))
+            .modifier(ActionTooltip(text: loc("report.help")))
             Button { model.refresh() } label: { Label(loc("button.refresh.help"), systemImage: "arrow.clockwise") }
                 .disabled(model.isLoading || model.isDemo)
                 .modifier(NativeCircleAction())
-                .help(loc("refresh.now.help"))
+                .modifier(ActionTooltip(text: loc("refresh.now.help")))
         }
     }
     private func notice(_ text: String, icon: String, color: Color) -> some View {

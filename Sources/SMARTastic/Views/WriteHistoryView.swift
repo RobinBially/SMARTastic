@@ -153,7 +153,8 @@ struct WriteHistoryView: View {
                         Text(loc("history.note"))
                         Text(locf("history.timezone", calendar.timeZone.identifier))
                     }.foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 6)
-                }.foregroundStyle(.secondary)
+                }.disclosureGroupStyle(FullRowDisclosureStyle())
+                    .foregroundStyle(.secondary)
                     .help(loc("history.details.help"))
             }
         }

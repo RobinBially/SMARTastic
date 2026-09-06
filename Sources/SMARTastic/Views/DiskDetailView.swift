@@ -64,7 +64,8 @@ struct DiskDetailView: View {
                     DisclosureGroup(loc("diagnostics.title")) {
                         Text(diagnostic).font(.system(.caption, design: .monospaced)).textSelection(.enabled)
                             .frame(maxWidth: .infinity, alignment: .leading).padding(.top, 8)
-                    }.font(.system(size: 13)).foregroundStyle(.secondary)
+                    }.disclosureGroupStyle(FullRowDisclosureStyle())
+                    .font(.system(size: 13)).foregroundStyle(.secondary)
                 }
                 Text(loc("data.disclaimer")).font(.system(size: 12)).foregroundStyle(.secondary)
             }

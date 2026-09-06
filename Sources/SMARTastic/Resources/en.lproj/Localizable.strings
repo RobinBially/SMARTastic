@@ -123,3 +123,5 @@
 "history.no_measurement" = "No measurement for this day";
 "refresh.pause.help" = "Pause automatic scans; manual refresh remains available";
 "refresh.now.help" = "Refresh (⌘R) – read the latest values from all drives.";
+"disclosure.expanded" = "Expanded";
+"disclosure.collapsed" = "Collapsed";
