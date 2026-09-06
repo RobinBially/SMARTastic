@@ -84,11 +84,7 @@ Requires **macOS 14 Sonoma or later** and **smartmontools 7 or later**.
 The app supports Apple Silicon and Intel. Homebrew distribution uses the
 [LocalFoundry tap](https://github.com/localfoundry/homebrew-tap).
 
-The release pipeline and cask are prepared for version **1.1.0**. Until the first
-signed and notarized release is published to the tap, use the source-build steps
-below. Do not install an unsigned development build as a trusted public release.
-
-The intended Homebrew command after publication is:
+Install the signed and Apple-notarized Universal app through Homebrew:
 
 ```sh
 brew install --cask localfoundry/tap/smartastic
