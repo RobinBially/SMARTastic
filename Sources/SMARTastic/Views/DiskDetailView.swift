@@ -36,6 +36,7 @@ struct DiskDetailView: View {
                             MetricTile(label: loc("metric.power_cycles"), value: metric(disk.powerCycles), icon: "power")
                         }
                     }
+                    WriteHistoryView(disk: disk)
                     if disk.percentageUsed != nil {
                         VStack(alignment: .leading, spacing: 8) {
                             Label(loc("endurance.title"), systemImage: "info.circle").font(.subheadline.weight(.medium))

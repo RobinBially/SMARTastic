@@ -89,3 +89,21 @@ concrete findings were checked against code, tests and, where available, hardwar
   Homebrew cask publication is claimed yet.
 - CI signing/notary/tap recovery paths have been reviewed and prepared; an actual
   successful end-to-end public release remains the acceptance gate.
+
+## Follow-up: calendar write history
+
+- Added a native Swift Charts daily-write view with 7/30/90-day segments, measured
+  period total, today's partial total and selectable daily values/observed hours.
+- Daily amounts use counter differences and wall-clock timestamps; SMART power-on
+  hours never enter the calculation. Missing days are not fabricated as zero.
+- Same-day differences are assigned directly. Midnight intervals up to ten minutes
+  are apportioned by elapsed time; longer cross-day gaps are listed separately.
+- Local atomic JSON persistence retains 90 days, hashes model/serial identity,
+  handles counter decreases and stale samples, and preserves unreadable files.
+  Demo histories and test stores are isolated from real history.
+- Added seven regression tests covering real deltas, gaps, midnight, DST, resets,
+  identity, missing counters, retention, persistence and corrupt-file protection.
+  All 24 Swift tests passed, including the explicitly enabled hardware test.
+- Replaced the refresh dropdown with native pause/30-second/1-minute/5-minute
+  segments. Refined the chart with blue gradients, a mint today bar and a collapsible
+  explanation. Updated all five localizations and README history documentation.

@@ -96,3 +96,21 @@
 "power_on.help" = "Horas indicadas por la unidad. Los controladores NVMe pueden excluir estados de bajo consumo; no equivalen a la edad natural de la unidad.";
 "detail.written_per_smart_day" = "Escrito por 24 horas SMART";
 "detail.written_per_smart_day.help" = "Volumen total escrito dividido por las horas de funcionamiento indicadas por la unidad, normalizado a 24 horas. Puede excluir periodos de bajo consumo; no equivale necesariamente a una media por día natural ni a la velocidad actual.";
+
+// Daily write history
+"history.title" = "Escrituras por día";
+"history.range" = "Periodo";
+"history.days" = "%d días";
+"history.day" = "Día";
+"history.recorded" = "registrados en el periodo";
+"history.empty" = "Registro iniciado. Los valores aparecerán tras la próxima actualización correcta.";
+"history.unavailable" = "No hay identificador fiable de unidad o contador de escritura.";
+"history.error" = "No se pudo cargar o guardar el historial.";
+"history.gaps" = "%.2f GB de intervalos sin mediciones que afectan a este periodo no se pueden asignar a días concretos.";
+"history.note" = "Las barras muestran escrituras medidas, sin extrapolación. Los días vacíos no tienen mediciones; hoy y los días parciales están incompletos. Los intervalos de medianoche de hasta 10 minutos se distribuyen proporcionalmente. Se registra con la app abierta y se conservan 90 días. Selecciona una barra para ver su valor y horas observadas.";
+"history.timezone" = "Zona horaria del calendario: %@";
+"history.today" = "Hoy · hasta ahora";
+"history.observed" = "%d / %d días observados";
+"history.demo" = "Historial de ejemplo";
+"history.details" = "Acerca de estos valores";
+"refresh.segment.help" = "Actualizar automáticamente o pausar para escanear solo manualmente.";

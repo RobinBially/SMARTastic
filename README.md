@@ -26,9 +26,12 @@ and developed by [Robin Bially](https://github.com/RobinBially).
   NVMe critical warnings and depleted endurance are never hidden by a green score.
 - **Available measurements:** temperature, rated endurance, spare capacity,
   media/sector error counters, data read/written, power-on hours and power cycles.
+- **Daily write history:** a native bar chart for 7, 30 or 90 days, with a today
+  summary and selectable bars. Uses real timestamps and counter differences,
+  independently of SMART power-on hours.
 - **Drive search** by model or interface, with native keyboard selection.
-- **Refresh controls:** manual, every 30 seconds, every minute (default), or every
-  five minutes. The last successful scan time stays visible.
+- **Refresh controls:** native segments for pause/manual, every 30 seconds,
+  every minute (default), or every five minutes. The last successful scan time stays visible.
 - **JSON report export** with a versioned schema and measurement timestamp.
   Serial-number fields are omitted; review diagnostic text before sharing.
 - **Read diagnostics** and useful guidance when smartmontools or SMART access is
@@ -40,6 +43,36 @@ and developed by [Robin Bially](https://github.com/RobinBially).
   Simplified Chinese translations selected from your system preferences.
 
 <img src="assets/screenshot-warning.png" alt="SMARTastic showing an HDD with sector warnings and unavailable measurements displayed as dashes" width="1100">
+
+## Daily write history
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/history-dark.png">
+  <img src="assets/history-light.png" alt="Daily write history with a mint today bar and visible gaps, using synthetic demo data" width="900">
+</picture>
+
+
+History starts when this version first scans a drive. SMART only exposes a lifetime
+counter; it cannot reconstruct earlier daily usage. Keep SMARTastic open with
+periodic refresh enabled to collect regular measurements. There is no background
+agent when the app is quit.
+
+The chart shows measured GB, not extrapolated full-day totals. Missing days stay
+empty; an observed zero is shown as a dot. Today's value and other partially
+observed days are incomplete. Select a bar to see its measured amount and covered
+hours. Short intervals crossing midnight (up to 10 minutes) are split in proportion
+to elapsed time. Longer intervals crossing days are reported separately rather
+than assigned to invented daily totals. Their entire volume is reported if the
+interval overlaps the selected period, so it may include writes outside that period.
+
+Up to 90 calendar days are kept locally in
+`~/Library/Application Support/SMARTastic/write-history.json`. A hash of model and
+serial identifies each drive across device-path changes; raw serial numbers are
+not stored. Drives without a reliable serial or write counter cannot be tracked.
+Counter decreases establish a fresh baseline. The calendar time zone is fixed when
+the history is created and displayed under the chart's measurement explanation.
+Demo history stays in memory and never enters the real history file. The existing
+JSON report exports the current SMART snapshot, not this local history.
 
 ## Install
 

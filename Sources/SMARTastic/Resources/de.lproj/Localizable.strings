@@ -96,3 +96,21 @@
 "power_on.help" = "Vom Laufwerk gemeldete Stunden. NVMe-Controller können Stromsparzeiten auslassen; der Wert entspricht nicht dem Kalenderalter des Laufwerks.";
 "detail.written_per_smart_day" = "Geschrieben je 24 SMART-Stunden";
 "detail.written_per_smart_day.help" = "Gesamte Schreibmenge geteilt durch die vom Laufwerk gemeldeten Betriebsstunden, auf 24 Stunden normiert. Stromsparzeiten können fehlen; das ist deshalb nicht zwingend ein Kalendertagesdurchschnitt oder die aktuelle Schreibgeschwindigkeit.";
+
+// Daily write history
+"history.title" = "Schreibvolumen pro Tag";
+"history.range" = "Zeitraum";
+"history.days" = "%d Tage";
+"history.day" = "Tag";
+"history.recorded" = "im Zeitraum erfasst";
+"history.empty" = "Aufzeichnung gestartet. Tageswerte erscheinen nach der nächsten erfolgreichen Aktualisierung.";
+"history.unavailable" = "Keine verlässliche Laufwerkskennung oder kein Schreibzähler verfügbar.";
+"history.error" = "Verlauf konnte nicht geladen oder gespeichert werden.";
+"history.gaps" = "%.2f GB aus Messlücken, die diesen Zeitraum berühren, lassen sich keinem einzelnen Tag zuordnen.";
+"history.note" = "Balken zeigen gemessene Schreibmengen, keine Hochrechnung. Leere Tage haben keine Messwerte; heute und teilweise erfasste Tage sind unvollständig. Kurze Intervalle über Mitternacht (bis 10 Minuten) werden anteilig verteilt. Die App zeichnet auf, solange sie geöffnet ist, und bewahrt 90 Tage auf. Balken auswählen für Wert und erfasste Stunden.";
+"history.timezone" = "Kalenderzeitzone: %@";
+"history.today" = "Heute · bisher";
+"history.observed" = "%d / %d Tage erfasst";
+"history.demo" = "Demo-Verlauf";
+"history.details" = "Wie wird gemessen?";
+"refresh.segment.help" = "Automatisch aktualisieren oder mit Pause nur manuell scannen.";

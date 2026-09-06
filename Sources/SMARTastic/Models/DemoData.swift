@@ -2,6 +2,23 @@ import Foundation
 
 /// Synthetic examples for documentation; never mixed with live measurements.
 enum DemoData {
+    @MainActor static func seedHistory(_ store: WriteHistoryStore, now: Date = .now) {
+        let calendar = store.history.calendar
+        let today = calendar.startOfDay(for: now)
+        var disk = disks[0]
+        var total = 20.0
+        // Deliberately leave two gaps to demonstrate honest missing-data handling.
+        for offset in -89...0 {
+            if offset == -4 || offset == -3 { continue }
+            let start = calendar.date(byAdding: .day, value: offset, to: today)!
+            let end = offset == 0 ? now : calendar.date(byAdding: .day, value: 1, to: start)!.addingTimeInterval(-1)
+            disk.dataWrittenTB = total
+            store.record([disk], at: start)
+            total += (Double((offset + 90) * 17 % 53) + 8 + (offset == -5 ? 85 : 0)) / 1000
+            disk.dataWrittenTB = total
+            store.record([disk], at: end)
+        }
+    }
     static let disks: [DiskInfo] = [
         DiskInfo(id: "demo-nvme", model: "Samsung SSD 990 PRO 2TB", serial: "DEMO-NVME-001", firmware: "4B2QJXD7",
                  capacityBytes: 2e12, driveType: .ssd, interface: "NVMe", smartAvailable: true, smartPassed: true,

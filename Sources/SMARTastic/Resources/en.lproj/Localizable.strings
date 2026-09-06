@@ -96,3 +96,21 @@
 "power_on.help" = "Hours reported by the drive. NVMe controllers may exclude time in low-power states; this is not the drive’s calendar age.";
 "detail.written_per_smart_day" = "Written per 24 SMART hours";
 "detail.written_per_smart_day.help" = "Lifetime written data divided by drive-reported power-on hours, normalized to 24 hours. Low-power periods may be excluded, so this need not equal a calendar-day average or the current write speed.";
+
+// Daily write history
+"history.title" = "Daily writes";
+"history.range" = "Period";
+"history.days" = "%d days";
+"history.day" = "Day";
+"history.recorded" = "recorded in this period";
+"history.empty" = "Recording started. Daily values appear after the next successful refresh.";
+"history.unavailable" = "No reliable drive identity or write counter is available.";
+"history.error" = "History could not be loaded or saved.";
+"history.gaps" = "%.2f GB across measurement gaps touching this period could not be assigned to individual days.";
+"history.note" = "Bars show measured writes, not projected daily totals. Empty days have no measurements; today and other partly observed days are incomplete. Short midnight intervals (up to 10 minutes) are split proportionally. Records are collected while the app is open and kept for 90 days. Select a bar for its value and observed hours.";
+"history.timezone" = "Calendar time zone: %@";
+"history.today" = "Today · so far";
+"history.observed" = "%d / %d days observed";
+"history.demo" = "Demo history";
+"history.details" = "About these values";
+"refresh.segment.help" = "Refresh automatically, or pause for manual scans only.";

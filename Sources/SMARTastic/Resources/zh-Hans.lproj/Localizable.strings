@@ -96,3 +96,21 @@
 "power_on.help" = "磁盘报告的小时数。NVMe 控制器可能不计入低功耗状态的时间，因此该数值不代表磁盘的日历使用时长。";
 "detail.written_per_smart_day" = "每 24 个 SMART 小时写入量";
 "detail.written_per_smart_day.help" = "总写入量除以磁盘报告的通电小时数，再换算为 24 小时。低功耗时间可能未计入，因此不一定等于日历日平均值，也不表示当前写入速度。";
+
+// Daily write history
+"history.title" = "每日写入量";
+"history.range" = "时间范围";
+"history.days" = "%d 天";
+"history.day" = "日期";
+"history.recorded" = "此期间已记录";
+"history.empty" = "已开始记录。下次成功刷新后将显示每日数据。";
+"history.unavailable" = "没有可靠的驱动器标识或写入计数器。";
+"history.error" = "无法加载或保存历史记录。";
+"history.gaps" = "涉及此期间的测量间隔中有 %.2f GB 无法分配到具体日期。";
+"history.note" = "柱形显示实测写入量，不进行全天推算。空白日期没有测量值；今天和部分记录的日期均不完整。跨午夜且不超过 10 分钟的间隔按时间比例分配。仅在应用打开时记录，保留 90 天。选择柱形查看数值及观测小时数。";
+"history.timezone" = "日历时区：%@";
+"history.today" = "今天 · 至今";
+"history.observed" = "已观测 %d / %d 天";
+"history.demo" = "演示历史";
+"history.details" = "关于这些数值";
+"refresh.segment.help" = "自动刷新，或暂停后仅手动扫描。";

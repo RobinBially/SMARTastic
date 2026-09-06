@@ -96,3 +96,21 @@
 "power_on.help" = "Heures indiquées par le disque. Les contrôleurs NVMe peuvent exclure les états de faible consommation ; ce n’est pas l’âge calendaire du disque.";
 "detail.written_per_smart_day" = "Écrit par 24 heures SMART";
 "detail.written_per_smart_day.help" = "Volume total écrit divisé par les heures de fonctionnement indiquées par le disque, ramené à 24 heures. Des périodes de faible consommation peuvent être exclues ; ce n’est pas nécessairement une moyenne par jour calendaire ni le débit actuel.";
+
+// Daily write history
+"history.title" = "Écritures par jour";
+"history.range" = "Période";
+"history.days" = "%d jours";
+"history.day" = "Jour";
+"history.recorded" = "enregistrés sur la période";
+"history.empty" = "Enregistrement démarré. Les valeurs apparaîtront après la prochaine actualisation réussie.";
+"history.unavailable" = "Identifiant fiable du disque ou compteur d’écriture indisponible.";
+"history.error" = "Impossible de charger ou sauvegarder l’historique.";
+"history.gaps" = "%.2f Go couvrant des lacunes de mesure touchant cette période ne peuvent être attribués à un jour précis.";
+"history.note" = "Les barres montrent les écritures mesurées, sans extrapolation. Les jours vides sont sans mesure ; aujourd’hui et les jours partiels sont incomplets. Les intervalles à minuit de 10 minutes maximum sont répartis proportionnellement. Collecte lorsque l’app est ouverte, conservation de 90 jours. Sélectionnez une barre pour sa valeur et les heures observées.";
+"history.timezone" = "Fuseau du calendrier : %@";
+"history.today" = "Aujourd’hui · à présent";
+"history.observed" = "%d / %d jours observés";
+"history.demo" = "Historique démo";
+"history.details" = "À propos des valeurs";
+"refresh.segment.help" = "Actualiser automatiquement ou mettre en pause pour des analyses manuelles.";

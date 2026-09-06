@@ -44,6 +44,7 @@ enum AppAppearance: String, CaseIterable {
 
 @MainActor @Observable
 final class AppModel {
+    let writeHistory: WriteHistoryStore
     var disks: [DiskInfo] = []
     var isLoading = false
     var error: String?
@@ -63,7 +64,9 @@ final class AppModel {
     private let scanner: @Sendable () async throws -> ScanResult
 
     init(isDemo: Bool = ProcessInfo.processInfo.arguments.contains("--demo"),
+         historyStore: WriteHistoryStore? = nil,
          scanner: @escaping @Sendable () async throws -> ScanResult = { try await SmartCtlService.shared.scan() }) {
+        self.writeHistory = historyStore ?? WriteHistoryStore(url: isDemo ? nil : FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent("SMARTastic/write-history.json"))
         self.isDemo = isDemo
         self.scanner = scanner
         let savedAppearance = AppAppearance(rawValue: UserDefaults.standard.string(forKey: "appearance") ?? "system") ?? .system
@@ -72,6 +75,7 @@ final class AppModel {
         refreshInterval = [0, 30, 60, 300].contains(saved) ? saved : 60
         if isDemo {
             disks = DemoData.disks
+            DemoData.seedHistory(writeHistory)
             selectedDiskID = disks.first?.id
             lastRefreshed = .now
         }
@@ -97,6 +101,7 @@ final class AppModel {
                 disks = result.disks
                 error = result.warning
                 lastRefreshed = .now
+                writeHistory.record(disks, at: lastRefreshed!)
                 if !disks.contains(where: { $0.id == selectedDiskID }) { selectedDiskID = disks.first?.id }
             } catch { self.error = error.localizedDescription }
         }

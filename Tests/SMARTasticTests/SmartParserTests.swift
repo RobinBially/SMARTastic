@@ -95,7 +95,7 @@ final class AppModelTests: XCTestCase {
         XCTAssertFalse(model.isLoading)
     }
     func testSelectionReconcilesAfterDisconnect() async throws {
-        let model = AppModel(isDemo: false, scanner: { ScanResult(disks: [DemoData.disks[1]], warning: nil) })
+        let model = AppModel(isDemo: false, historyStore: WriteHistoryStore(url: nil), scanner: { ScanResult(disks: [DemoData.disks[1]], warning: nil) })
         model.disks = DemoData.disks
         model.selectedDiskID = DemoData.disks[0].id
         model.refresh()
@@ -104,7 +104,7 @@ final class AppModelTests: XCTestCase {
         XCTAssertNotNil(model.lastRefreshed)
     }
     func testFailurePreservesSnapshotAndExposesError() async throws {
-        let model = AppModel(isDemo: false, scanner: { throw SmartCtlError.commandFailed("test failure") })
+        let model = AppModel(isDemo: false, historyStore: WriteHistoryStore(url: nil), scanner: { throw SmartCtlError.commandFailed("test failure") })
         model.disks = DemoData.disks
         model.selectedDiskID = DemoData.disks[0].id
         model.lastRefreshed = Date(timeIntervalSince1970: 123)
@@ -115,7 +115,7 @@ final class AppModelTests: XCTestCase {
         XCTAssertEqual(model.error, "test failure")
     }
     func testEmptyScanClearsSelection() async throws {
-        let model = AppModel(isDemo: false, scanner: { ScanResult(disks: [], warning: nil) })
+        let model = AppModel(isDemo: false, historyStore: WriteHistoryStore(url: nil), scanner: { ScanResult(disks: [], warning: nil) })
         model.disks = DemoData.disks
         model.selectedDiskID = DemoData.disks[0].id
         model.refresh()
@@ -133,7 +133,7 @@ final class AppModelTests: XCTestCase {
             }
         }
         let counter = Counter()
-        let model = AppModel(isDemo: false, scanner: { try await counter.scan() })
+        let model = AppModel(isDemo: false, historyStore: WriteHistoryStore(url: nil), scanner: { try await counter.scan() })
         model.refresh(); model.refresh()
         try await finish(model)
         let calls = await counter.calls

@@ -44,12 +44,20 @@ struct ContentView: View {
                         Spacer()
                         AppearanceToggle()
                     }
-                    Picker(loc("refresh.interval"), selection: $model.refreshInterval) {
-                        Text(loc("refresh.manual")).tag(0.0)
-                        Text(loc("refresh.30s")).tag(30.0)
-                        Text(loc("refresh.1m")).tag(60.0)
-                        Text(loc("refresh.5m")).tag(300.0)
-                    }.disabled(model.isDemo)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label(loc("refresh.interval"), systemImage: "arrow.clockwise")
+                            .font(.system(size: 12)).foregroundStyle(.secondary)
+                        Picker(loc("refresh.interval"), selection: $model.refreshInterval) {
+                            Image(systemName: "pause.fill").tag(0.0)
+                                .accessibilityLabel(loc("refresh.manual"))
+                            Text("30 s").tag(30.0)
+                            Text("1 min").tag(60.0)
+                            Text("5 min").tag(300.0)
+                        }
+                        .pickerStyle(.segmented).labelsHidden()
+                        .help(loc("refresh.segment.help"))
+                        .disabled(model.isDemo)
+                    }.padding(.vertical, 4)
                     if let last = model.lastRefreshed {
                         HStack {
                             Text(loc("refresh.updated"))
