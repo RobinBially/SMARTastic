@@ -5,3 +5,5 @@
 .DS_Store
 *.dSYM
 *.dSYM/**
+
+__pycache__/

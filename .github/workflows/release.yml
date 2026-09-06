@@ -1,0 +1,139 @@
+name: Signed release and Homebrew
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (x.y.z)'
+        required: true
+        type: string
+      resume_run_id:
+        description: 'Optional original run ID for an interrupted notarization'
+        required: false
+        type: string
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: smartastic-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      VERSION: ${{ inputs.version }}
+      RELEASE_REPOSITORY: ${{ github.repository }}
+      NOTARY_PROFILE: smartastic-release
+    steps:
+      - name: Set temporary keychain paths
+        run: |
+          printf 'CODE_SIGN_KEYCHAIN=%s/smartastic-signing.keychain-db\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'NOTARY_KEYCHAIN=%s/smartastic-signing.keychain-db\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1
+        with:
+          xcode-version: '26.3'
+      - name: Check release and tap access
+        env:
+          GH_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+        run: |
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit 1
+          test -n "$GH_TOKEN"
+          test "$(gh api repos/localfoundry/homebrew-tap --jq .permissions.push)" = true
+      - name: Resolve release or restore notarization state
+        id: state
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RESUME_RUN_ID: ${{ inputs.resume_run_id }}
+        run: python3 scripts/prepare-release.py
+      - name: Run tests
+        if: steps.state.outputs.mode == 'build'
+        run: |
+          python3 -m unittest discover -s Tests/Release -v
+          swift test
+      - name: Import signing certificate and notary credentials
+        if: steps.state.outputs.mode == 'build'
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          for variable in CSC_LINK CSC_KEY_PASSWORD APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+            [[ -n "${!variable}" ]] || { echo "Required secret missing: $variable" >&2; exit 1; }
+          done
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Version must be x.y.z.' >&2; exit 1; }
+          keychain_password="$(openssl rand -hex 32)"
+          echo "::add-mask::$keychain_password"
+          printf '%s' "$CSC_LINK" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security create-keychain -p "$keychain_password" "$CODE_SIGN_KEYCHAIN"
+          security set-keychain-settings -lut 3600 "$CODE_SIGN_KEYCHAIN"
+          security unlock-keychain -p "$keychain_password" "$CODE_SIGN_KEYCHAIN"
+          # codesign also searches for the private key and certificate chain here.
+          python3 - <<'PYTHON'
+          import os, shlex, subprocess
+          existing = shlex.split(subprocess.check_output(
+              ["security", "list-keychains", "-d", "user"], text=True))
+          subprocess.run(["security", "list-keychains", "-d", "user", "-s",
+                          os.environ["CODE_SIGN_KEYCHAIN"], *existing], check=True)
+          PYTHON
+          security import "$RUNNER_TEMP/certificate.p12" -P "$CSC_KEY_PASSWORD" -k "$CODE_SIGN_KEYCHAIN" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$CODE_SIGN_KEYCHAIN"
+          rm "$RUNNER_TEMP/certificate.p12"
+          # Use the sole valid Developer ID identity imported for this team.
+          python3 - <<'PYTHON'
+          import os, re, subprocess
+          result = subprocess.run(
+              ["security", "find-identity", "-v", "-p", "codesigning", os.environ["CODE_SIGN_KEYCHAIN"]],
+              check=True, capture_output=True, text=True)
+          identities = re.findall(r'"(Developer ID Application: [^"\n]+)"', result.stdout)
+          identities = [name for name in identities if name.endswith("(" + os.environ["APPLE_TEAM_ID"] + ")")]
+          if len(identities) != 1:
+              raise SystemExit("Expected exactly one valid Developer ID Application identity for APPLE_TEAM_ID.")
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as output:
+              output.write("CODE_SIGN_IDENTITY=" + identities[0] + "\n")
+          PYTHON
+          xcrun notarytool store-credentials "$NOTARY_PROFILE" --keychain "$NOTARY_KEYCHAIN" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID"
+      - name: Build Universal app and notarize
+        if: steps.state.outputs.mode == 'build'
+        env:
+          ARCHS: arm64 x86_64
+        run: ./scripts/release.sh .build/releases
+      - name: Verify final or restored archive
+        run: ./scripts/verify-release.sh
+      - name: Publish verified release
+        if: steps.state.outputs.mode != 'tap'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v$VERSION" \
+            ".build/releases/SMARTastic-$VERSION.zip" \
+            ".build/releases/SMARTastic-$VERSION.zip.sha256" \
+            ".build/releases/Casks/smartastic.rb" \
+            --target "$GITHUB_SHA" --title "SMARTastic $VERSION" --generate-notes
+          mkdir -p .build/download-check
+          gh release download "v$VERSION" --pattern "SMARTastic-$VERSION.zip*" --dir .build/download-check
+          (cd .build/download-check && shasum -a 256 -c "SMARTastic-$VERSION.zip.sha256")
+      - name: Update and verify Homebrew tap
+        env:
+          GH_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+        run: ./scripts/update-tap.sh
+      - name: Remove temporary signing material
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/certificate.p12"
+          if [[ -f "$CODE_SIGN_KEYCHAIN" ]]; then
+            security delete-keychain "$CODE_SIGN_KEYCHAIN"
+          fi
+      - name: Preserve non-secret notarization state
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: smartastic-notarization-${{ github.run_id }}
+          path: .build/releases
+          overwrite: true
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7

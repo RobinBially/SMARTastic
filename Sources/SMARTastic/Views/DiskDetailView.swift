@@ -2,427 +2,154 @@ import SwiftUI
 
 struct DiskDetailView: View {
     let disk: DiskInfo
-
+    var isDemo = false
+    var scanWarning: String?
+    @State private var detailWidth: CGFloat = 0
+    private var columns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 12), count: detailWidth >= 720 ? 4 : 2)
+    }
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(alignment: .leading, spacing: 22) {
+                if isDemo {
+                    Label(loc("demo.notice"), systemImage: "photo")
+                        .font(.system(size: 12)).foregroundStyle(.secondary)
+                }
+                if let scanWarning {
+                    Label(scanWarning, systemImage: "exclamationmark.triangle")
+                        .font(.system(size: 13)).foregroundStyle(.orange).textSelection(.enabled)
+                }
                 header
+                status
                 if disk.smartAvailable {
-                    healthOverview
-                    performanceSection
-                    attributesSection
-                } else {
-                    noSmartSection
+                    section(loc("section.health")) {
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: disk.driveType == .ssd && detailWidth >= 720 ? 4 : 2), spacing: 12) {
+                            healthMetrics
+                        }
+                    }
+                    section(loc("section.usage")) {
+                        LazyVGrid(columns: columns, spacing: 12) {
+                            MetricTile(label: loc("metric.written"), value: metric(disk.dataWrittenTB, suffix: " TB", decimals: 2), icon: "arrow.down.to.line", color: .cyan)
+                            MetricTile(label: loc("metric.read"), value: metric(disk.dataReadTB, suffix: " TB", decimals: 2), icon: "arrow.up.to.line", color: .cyan)
+                            MetricTile(label: loc("metric.power_on_time"), value: metric(disk.powerOnHours), icon: "clock", detail: loc("metric.power_on_detail"))
+                                .help(loc("power_on.help"))
+                            MetricTile(label: loc("metric.power_cycles"), value: metric(disk.powerCycles), icon: "power")
+                        }
+                    }
+                    WriteHistoryView(disk: disk)
+                    if disk.percentageUsed != nil {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Label(loc("endurance.title"), systemImage: "info.circle").font(.subheadline.weight(.medium))
+                            Text(loc("endurance.explanation")).font(.system(size: 13)).foregroundStyle(.secondary)
+                            if let volume = disk.writtenGBPer24PowerOnHours {
+                                Text(loc("detail.written_per_smart_day") + ": " + metric(volume, suffix: " GB", decimals: 1))
+                                    .font(.system(size: 13))
+                                    .help(loc("detail.written_per_smart_day.help"))
+                            }
+                        }.padding(16).frame(maxWidth: .infinity, alignment: .leading).background(.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
+                    }
                 }
-                infoSection
+                section(loc("section.drive_info")) {
+                    VStack(spacing: 0) {
+                        InfoRow(label: loc("info.serial"), value: disk.serial ?? "—")
+                        Divider()
+                        InfoRow(label: loc("info.firmware"), value: disk.firmware ?? "—")
+                        Divider()
+                        InfoRow(label: loc("info.capacity"), value: disk.size)
+                        Divider()
+                        InfoRow(label: loc("metric.unsafe_shutdowns"), value: metric(disk.unsafeShutdowns))
+                    }.background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 18))
+                }
+                if let diagnostic = disk.diagnostic {
+                    DisclosureGroup(loc("diagnostics.title")) {
+                        Text(diagnostic).font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading).padding(.top, 8)
+                    }.disclosureGroupStyle(FullRowDisclosureStyle())
+                    .font(.system(size: 13)).foregroundStyle(.secondary)
+                }
+                Text(loc("data.disclaimer")).font(.system(size: 12)).foregroundStyle(.secondary)
             }
-            .padding(24)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { detailWidth = $0 }
+            .padding(26).padding(.top, 22).frame(maxWidth: 1100)
+                .frame(maxWidth: .infinity)
         }
-        .background()
     }
-
-    // MARK: - Header
-
+    @ViewBuilder private var healthMetrics: some View {
+        MetricTile(label: loc("gauge.temperature"), value: metric(disk.temperature, suffix: " °C"), icon: "thermometer.medium", color: disk.tempColor)
+        MetricTile(label: loc("gauge.media_errors"), value: metric(disk.mediaErrors), icon: "exclamationmark.circle", color: (disk.mediaErrors ?? 0) > 0 ? .orange : .secondary)
+        if disk.driveType == .ssd {
+            MetricTile(label: loc("endurance.remaining"), value: metric(disk.remainingEndurance, suffix: " %"), icon: "chart.bar", color: disk.healthColor, progress: disk.remainingEndurance)
+            MetricTile(label: loc("gauge.spare"), value: metric(disk.availableSpare, suffix: " %"), icon: "square.stack.3d.up", color: .teal, progress: disk.availableSpare)
+        }
+    }
     private var header: some View {
-        HStack(spacing: 16) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(disk.healthColor.gradient)
-                    .frame(width: 64, height: 64)
-                    .shadow(color: disk.healthColor.opacity(0.35), radius: 8, y: 4)
-                Image(systemName: disk.icon)
-                    .font(.title.weight(.medium))
-                    .foregroundStyle(.white)
+        HStack(spacing: 14) {
+            Image(systemName: disk.icon).font(.system(size: 28)).foregroundStyle(.cyan)
+                .frame(width: 58, height: 58).background(.cyan.opacity(0.09), in: RoundedRectangle(cornerRadius: 18))
+            VStack(alignment: .leading, spacing: 6) {
+                Text(disk.model).font(.system(size: 21, weight: .semibold)).textSelection(.enabled).fixedSize(horizontal: false, vertical: true)
+                Text("\(disk.size)  ·  \(disk.driveType.rawValue)  ·  \(disk.interface)").font(.system(size: 13)).foregroundStyle(.secondary)
             }
-
+            Spacer(minLength: 0)
+        }
+    }
+    private var status: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: disk.health.symbol).font(.title2).foregroundStyle(disk.healthColor)
             VStack(alignment: .leading, spacing: 5) {
-                Text(disk.model)
-                    .font(.title2.weight(.semibold))
-                HStack(spacing: 8) {
-                    Badge(disk.driveType.rawValue, color: .blue)
-                    Badge(disk.interface, color: .secondary)
-                    if disk.smartAvailable {
-                        Badge(loc(disk.smartPassed ? "badge.smart_ok" : "badge.smart_error"),
-                              color: disk.smartPassed ? .green : .red)
-                        Badge(disk.healthLabel, color: disk.healthColor)
-                    } else {
-                        Badge(loc("badge.smart_na"), color: .gray)
-                    }
-                }
+                Text(disk.healthLabel).font(.system(size: 14, weight: .semibold))
+                Text(loc(!disk.smartAvailable ? "nosmart.message" : disk.health == .critical ? "status.critical" : disk.health == .warning ? "status.warning" : disk.health == .healthy ? "status.healthy" : "status.unknown"))
+                    .font(.system(size: 13)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
-
-            Spacer()
-
-            if disk.smartAvailable {
-                healthScoreBadge
-            }
-        }
+            Spacer(minLength: 0)
+        }.padding(16).frame(maxWidth: .infinity, alignment: .leading)
+            .background(disk.healthColor.opacity(0.07), in: RoundedRectangle(cornerRadius: 18))
     }
-
-    private var healthScoreBadge: some View {
-        VStack(spacing: 2) {
-            ZStack {
-                Circle()
-                    .stroke(.quaternary, lineWidth: 5)
-                    .frame(width: 56, height: 56)
-                Circle()
-                    .trim(from: 0, to: Double(disk.healthScore) / 100)
-                    .stroke(
-                        AngularGradient(colors: [disk.healthColor.opacity(0.4), disk.healthColor],
-                                       center: .center),
-                        style: StrokeStyle(lineWidth: 5, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                    .frame(width: 56, height: 56)
-                    .animation(.smooth, value: disk.healthScore)
-                Text("\(disk.healthScore)")
-                    .font(.title3.weight(.bold))
-                    .monospacedDigit()
-            }
-            Text(LocalizedStringKey("label.health"), bundle: .module)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    // MARK: - Health Overview
-
-    private var healthOverview: some View {
+    private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle(loc("section.health"), icon: "heart.text.clipboard")
-
-            HStack(spacing: 20) {
-                if disk.driveType == .ssd {
-                    LargeGauge(
-                        value: disk.percentageUsed,
-                        maxValue: 100,
-                        label: loc("gauge.lifespan"),
-                        unit: loc("gauge.lifespan_unit"),
-                        inverted: true,
-                        color: disk.healthColor,
-                        detail: disk.remainingLifeEstimate
-                    )
-                }
-
-                LargeGauge(
-                    value: disk.temperature,
-                    maxValue: disk.driveType == .ssd ? 85 : 65,
-                    label: loc("gauge.temperature"),
-                    unit: "\u{00B0}C",
-                    inverted: false,
-                    color: disk.tempColor,
-                    detail: disk.tempLabel
-                )
-
-                LargeGauge(
-                    value: disk.availableSpare,
-                    maxValue: 100,
-                    label: loc("gauge.spare"),
-                    unit: "%",
-                    inverted: false,
-                    color: .green,
-                    detail: loc("gauge.spare_detail")
-                )
-
-                LargeGauge(
-                    value: Double(disk.mediaErrors),
-                    maxValue: max(100, Double(disk.mediaErrors) * 2),
-                    label: loc("gauge.media_errors"),
-                    unit: "",
-                    inverted: false,
-                    color: disk.mediaErrors == 0 ? .green : .red,
-                    detail: disk.mediaErrors == 0 ? loc("gauge.media_errors_detail_none") : "\(disk.mediaErrors)"
-                )
-            }
+            Text(title).font(.system(size: 15, weight: .semibold))
+            content()
         }
-        .padding(16)
-        .background(RoundedRectangle(cornerRadius: 14).fill(.ultraThinMaterial))
-    }
-
-    // MARK: - Performance
-
-    private var performanceSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionTitle(loc("section.usage"), icon: "chart.bar.fill")
-
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                if disk.driveType == .ssd {
-                    MetricBox(icon: "arrow.down.circle", label: loc("metric.read"),
-                              value: "\(String(format: "%.1f", disk.dataReadTB)) TB",
-                              detail: "\(String(format: "%.1f", disk.dailyReadGB)) \(loc("metric.per_day"))")
-                    MetricBox(icon: "arrow.up.circle", label: loc("metric.written"),
-                              value: "\(String(format: "%.1f", disk.dataWrittenTB)) TB",
-                              detail: "\(String(format: "%.1f", disk.dailyWriteGB)) \(loc("metric.per_day"))")
-                } else {
-                    MetricBox(icon: "arrow.down.circle", label: loc("metric.read"), value: "\u{2014}", detail: "")
-                    MetricBox(icon: "arrow.up.circle", label: loc("metric.written"), value: "\u{2014}", detail: "")
-                }
-                MetricBox(icon: "clock", label: loc("metric.power_on_time"),
-                          value: disk.powerOnFormatted,
-                          detail: "\(disk.powerOnHours) \(loc("metric.power_on_detail"))")
-                MetricBox(icon: "power", label: loc("metric.power_cycles"),
-                          value: "\(disk.powerCycles)",
-                          detail: loc("metric.power_cycles_detail"))
-                if disk.driveType == .ssd {
-                    MetricBox(icon: "exclamationmark.triangle", label: loc("metric.unsafe_shutdowns"),
-                              value: "\(disk.unsafeShutdowns)",
-                              detail: loc("metric.unsafe_shutdowns_detail"))
-                }
-                MetricBox(icon: "ant", label: loc("gauge.media_errors"),
-                          value: "\(disk.mediaErrors)",
-                          detail: disk.mediaErrors == 0 ? loc("metric.media_errors_none") : loc("metric.media_errors_some"))
-            }
-        }
-        .padding(16)
-        .background(RoundedRectangle(cornerRadius: 14).fill(.ultraThinMaterial))
-    }
-
-    // MARK: - Attributes (table for ATA, key metrics for NVMe)
-
-    private var attributesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionTitle(loc("section.life_prognosis"), icon: "calendar")
-
-            HStack(spacing: 16) {
-                if disk.driveType == .ssd {
-                    DetailBox(label: loc("detail.life_consumed"),
-                              value: "\(String(format: "%.1f", disk.percentageUsed))%",
-                              icon: "timer")
-                    DetailBox(label: loc("detail.avg_write_rate"),
-                              value: "\(String(format: "%.1f", disk.dailyWriteGB)) \(loc("metric.per_day"))",
-                              icon: "speedometer")
-                    DetailBox(label: loc("detail.remaining_life"),
-                              value: disk.remainingLifeEstimate,
-                              icon: "hourglass")
-                } else {
-                    DetailBox(label: loc("detail.power_on"),
-                              value: disk.powerOnFormatted,
-                              icon: "clock")
-                    DetailBox(label: loc("detail.power_cycles"),
-                              value: "\(disk.powerCycles)",
-                              icon: "power")
-                }
-            }
-        }
-        .padding(16)
-        .background(RoundedRectangle(cornerRadius: 14).fill(.ultraThinMaterial))
-    }
-
-    // MARK: - No SMART
-
-    private var noSmartSection: some View {
-        VStack(spacing: 16) {
-            HStack(spacing: 12) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.title2)
-                    .foregroundStyle(.orange)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(LocalizedStringKey("nosmart.title"), bundle: .module)
-                        .font(.headline)
-                    Text(LocalizedStringKey("nosmart.message"), bundle: .module)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding(16)
-            .background(RoundedRectangle(cornerRadius: 12).fill(.ultraThinMaterial))
-        }
-    }
-
-    // MARK: - Drive Info
-
-    private var infoSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionTitle(loc("section.drive_info"), icon: "info.circle.fill")
-
-            VStack(spacing: 0) {
-                InfoRow(label: loc("info.serial"), value: disk.serial)
-                Divider().padding(.leading, 120)
-                InfoRow(label: loc("info.firmware"), value: disk.firmware)
-                Divider().padding(.leading, 120)
-                InfoRow(label: loc("info.capacity"), value: disk.size)
-                Divider().padding(.leading, 120)
-                InfoRow(label: loc("info.interface"), value: disk.interface)
-                if disk.driveType == .ssd {
-                    Divider().padding(.leading, 120)
-                    InfoRow(label: loc("info.tbw"),
-                            value: disk.percentageUsed > 0
-                                ? "\(String(format: "%.0f", disk.dataWrittenTB / disk.percentageUsed * 100)) TB"
-                                : "\u{2014}")
-                }
-            }
-            .background(RoundedRectangle(cornerRadius: 12).fill(.ultraThinMaterial))
-        }
-    }
-
-    // MARK: - Helpers
-
-    private func sectionTitle(_ text: String, icon: String) -> some View {
-        Label(text, systemImage: icon)
-            .font(.headline.weight(.semibold))
-            .foregroundStyle(.primary)
     }
 }
 
-// MARK: - Large Gauge
-
-struct LargeGauge: View {
-    let value: Double
-    let maxValue: Double
-    let label: String
-    let unit: String
-    let inverted: Bool
-    let color: Color
-    let detail: String
-
-    private var progress: Double {
-        let p = value / maxValue
-        return max(0, min(1, inverted ? 1 - p : p))
-    }
-
-    private var displayValue: Int {
-        Int(inverted ? max(0, maxValue - value) : value)
-    }
-
-    var body: some View {
-        VStack(spacing: 8) {
-            ZStack {
-                Circle()
-                    .stroke(.quaternary.opacity(0.4), lineWidth: 8)
-                Circle()
-                    .trim(from: 0, to: progress)
-                    .stroke(
-                        AngularGradient(colors: [color.opacity(0.3), color], center: .center),
-                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                    .animation(.smooth(duration: 0.6), value: progress)
-
-                VStack(spacing: 0) {
-                    Text("\(displayValue)")
-                        .font(.title2.weight(.bold))
-                        .monospacedDigit()
-                    if !unit.isEmpty {
-                        Text(unit)
-                            .font(.system(.caption2, design: .rounded))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-            .frame(width: 90, height: 90)
-
-            Text(label)
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.secondary)
-
-            Text(detail)
-                .font(.caption2)
-                .foregroundStyle(color)
-        }
-        .frame(maxWidth: .infinity)
-    }
-}
-
-// MARK: - Subviews
-
-struct Badge: View {
-    let text: String
-    let color: Color
-
-    init(_ text: String, color: Color) {
-        self.text = text
-        self.color = color
-    }
-
-    var body: some View {
-        Text(text)
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(.white)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(color.opacity(0.85))
-            .clipShape(Capsule())
-    }
-}
-
-struct MetricBox: View {
-    let icon: String
-    let label: String
-    let value: String
-    let detail: String
-
-    var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(.secondary)
-                .frame(width: 24)
-
-            VStack(alignment: .leading, spacing: 1) {
-                Text(value)
-                    .font(.callout.weight(.semibold))
-                    .monospacedDigit()
-                Text(label)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                if !detail.isEmpty {
-                    Text(detail)
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                }
-            }
-
-            Spacer()
-        }
-        .padding(10)
-        .background(RoundedRectangle(cornerRadius: 10).fill(.regularMaterial))
-    }
-}
-
-struct DetailBox: View {
+struct MetricTile: View {
     let label: String
     let value: String
     let icon: String
-
+    var color: Color = .secondary
+    var detail: String = ""
+    var progress: Double? = nil
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(.secondary)
-
-            VStack(alignment: .leading, spacing: 1) {
-                Text(value)
-                    .font(.callout.weight(.semibold))
-                    .monospacedDigit()
-                Text(label)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) { Image(systemName: icon).foregroundStyle(color); Text(label).foregroundStyle(Color.secondary) }.font(.system(size: 13))
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(value).font(.system(size: 23, weight: .semibold)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
+                if !detail.isEmpty { Text(detail).font(.system(size: 12)).foregroundStyle(.secondary) }
             }
-
-            Spacer()
-        }
-        .padding(12)
-        .background(RoundedRectangle(cornerRadius: 10).fill(.regularMaterial))
+            if let progress {
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(color.opacity(0.15))
+                        Capsule().fill(color).frame(width: geometry.size.width * max(0, min(100, progress)) / 100)
+                    }
+                }.frame(height: 5).accessibilityHidden(true)
+            }
+        }.frame(minWidth: 130, maxWidth: .infinity, minHeight: 84, alignment: .leading).padding(16)
+            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 18))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(.primary.opacity(0.05), lineWidth: 1))
+            .accessibilityElement(children: .combine)
     }
 }
 
 struct InfoRow: View {
     let label: String
     let value: String
-
     var body: some View {
-        HStack {
-            Text(label)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .frame(width: 110, alignment: .leading)
-            Spacer()
-            Text(value)
-                .font(.callout.weight(.medium))
-                .monospacedDigit()
-                .lineLimit(1)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        HStack(alignment: .top, spacing: 16) {
+            Text(label).foregroundStyle(.secondary)
+            Spacer(minLength: 12)
+            Text(value).monospacedDigit().textSelection(.enabled).multilineTextAlignment(.trailing)
+        }.font(.system(size: 13)).padding(.horizontal, 16).padding(.vertical, 11)
     }
 }
