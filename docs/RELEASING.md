@@ -57,53 +57,18 @@ before its ID was saved, recover the matching ID with `notarytool history`; do
 not submit again blindly. Invalid submissions require fixing the cause and a
 fresh version/state directory. Never overwrite a published release archive.
 
-## GitHub Actions and Homebrew
+## Publishing a release
 
-`build.yml` tests and builds both architectures without signing secrets.
-`release.yml` is manually dispatched with a version, validates release/tap access,
-runs tests, signs and notarizes, publishes the immutable GitHub release, and then
-updates `localfoundry/homebrew-tap`.
+Releases run locally. The shared driver calls this repository's `scripts/release.sh`, publishes the immutable GitHub release and updates `localfoundry/homebrew-tap`:
 
-A rerun of an interrupted job restores the saved artifact for that run. A new
-workflow dispatch can specify `resume_run_id` to restore an older submission;
-use the same source commit. The original bundle build number is retained.
-If the matching public release already exists, the workflow checks the tag's
-source commit and archive checksum, then resumes directly at tap distribution.
-Notary artifacts are retained for seven days; download them before expiry if
-manual follow-up is needed. Resume stops if the original state is unavailable.
-
-Required secrets in the repository running the signing job:
-
-| Secret | Purpose |
-| --- | --- |
-| `CSC_LINK` | Base64 PKCS#12 containing Developer ID certificate and private key |
-| `CSC_KEY_PASSWORD` | Password for the PKCS#12 |
-| `APPLE_ID` | Notarization Apple ID |
-| `APPLE_APP_SPECIFIC_PASSWORD` | Notarization app-specific password |
-| `APPLE_TEAM_ID` | Apple Developer team |
-| `TAP_GITHUB_TOKEN` | Write access to localfoundry/homebrew-tap |
-
-Secrets are imported after tests into a temporary keychain and cleaned up even
-on failure. Local identities and profile names do not exist on a fresh runner.
-A separate existing signing repository may run the same build against a pinned
-SMARTastic commit and return only the artifacts; secrets must stay there.
-
-Publish only after all checks pass, verify the public download against its
-checksum, then update the tap's cask and package list. The tap must reference the
-versioned download URL, never `latest` or `sha256 :no_check`. Validate with:
-
-```sh
-brew style localfoundry/tap/smartastic
-brew audit --cask --strict --online localfoundry/tap/smartastic
-brew install --cask localfoundry/tap/smartastic
-codesign --verify --deep --strict /Applications/SMARTastic.app
-xcrun stapler validate /Applications/SMARTastic.app
-spctl --assess --type execute --verbose=4 /Applications/SMARTastic.app
+```bash
+~/.agents/skills/macos-sign-release/scripts/release.sh --project smartastic --version x.y.z
 ```
 
-Respect branch protection. A release with an unmerged tap update is not fully
-shipped. Use GitHub noreply metadata for commits and tags. Intel execution needs
-an Intel Mac; a Universal build and `lipo` check alone do not prove that runtime.
+Add `--dry-run` to check the prerequisites without building anything. The driver runs the release and unit tests first and requires a clean working tree. Signing uses the Developer ID identity from the local keychain; notarization uses the notarytool keychain profile `localfoundry-notary`. Identity, team ID and profile name are read from `~/.config/macos-sign-release/config.json`. No signing secret lives in GitHub.
+
+For manual verification, download the published ZIP, check its checksum and launch the app on Apple Silicon and Intel.
+
 
 ## Artwork
 
