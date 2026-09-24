@@ -14,6 +14,24 @@ ARCHIVE="SMARTastic-$VERSION.zip"
 [[ ! -e "$OUTPUT/$ARCHIVE" ]] || { echo 'Final archive already exists; do not overwrite a release.' >&2; exit 1; }
 git diff --quiet HEAD || { echo 'Commit source changes before releasing.' >&2; exit 1; }
 [[ -z "$(git ls-files --others --exclude-standard)" ]] || { echo 'Untracked source files: commit or ignore them before releasing.' >&2; exit 1; }
+
+# --- Checks ------------------------------------------------------------------
+# XCTest und das SwiftUI-Macro-Plugin kommen nur mit dem vollen Xcode; die
+# Command Line Tools allein reichen nicht (siehe docs/RELEASING.md).
+if [[ -z "${DEVELOPER_DIR:-}" && "$(xcode-select -p)" == /Library/Developer/CommandLineTools ]]; then
+    for candidate in /Applications/Xcode.app /Applications/Xcode-beta.app; do
+        if [[ -d "$candidate/Contents/Developer" ]]; then
+            export DEVELOPER_DIR="$candidate/Contents/Developer"
+            echo "   Toolchain $DEVELOPER_DIR"
+            break
+        fi
+    done
+fi
+
+echo "== Checks"
+python3 -m unittest discover -s Tests/Release -v
+swift test
+
 STATE="$OUTPUT/.state-$VERSION"
 mkdir -p "$STATE"
 SOURCE_COMMIT="$(git rev-parse HEAD)"

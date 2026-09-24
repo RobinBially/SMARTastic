@@ -65,7 +65,7 @@ Releases run locally. The shared driver calls this repository's `scripts/release
 ~/.agents/skills/macos-sign-release/scripts/release.sh --project smartastic --version x.y.z
 ```
 
-Add `--dry-run` to check the prerequisites without building anything. The driver runs the release and unit tests first and requires a clean working tree. Signing uses the Developer ID identity from the local keychain; notarization uses the notarytool keychain profile `localfoundry-notary`. Identity, team ID and profile name are read from `~/.config/macos-sign-release/config.json`. No signing secret lives in GitHub.
+Add `--dry-run` to check the prerequisites without building anything. The driver requires a clean working tree; `scripts/release.sh` runs the release and unit tests before it builds. Signing uses the Developer ID identity from the local keychain; notarization uses the notarytool keychain profile `localfoundry-notary`. Identity, team ID and profile name are read from `~/.config/macos-sign-release/config.json`. No signing secret lives in GitHub.
 
 For manual verification, download the published ZIP, check its checksum and launch the app on Apple Silicon and Intel.
 
