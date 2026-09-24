@@ -32,11 +32,15 @@ A valid Developer ID Application identity and an authenticated notarytool
 keychain profile are required. Keep private keys and passwords out of this repo.
 
 ```sh
-VERSION=1.1.0 BUILD_NUMBER=2 \
-CODE_SIGN_IDENTITY='Developer ID Application: NAME (TEAMID)' \
-NOTARY_PROFILE='PROFILE_NAME' \
-./scripts/release.sh .build/releases
+VERSION=1.1.0 ./scripts/release.sh              # build the notarized artifacts
+VERSION=1.1.0 ./scripts/release.sh --publish    # also publish release and cask
 ```
+
+`BUILD_NUMBER` defaults to the commit count, `CODE_SIGN_IDENTITY` to the first
+Developer ID identity in the keychain, `NOTARY_PROFILE` to `localfoundry-notary`
+and `RELEASE_REPOSITORY` to `RobinBially/SMARTastic`. `--dry-run` checks the
+prerequisites without building, `--force` tolerates a dirty working tree and
+`--draft` creates the GitHub release as a draft.
 
 The script builds Universal, signs with Hardened Runtime and a secure timestamp,
 submits to Apple, requires `Accepted`, staples the app, verifies its signature and
@@ -59,13 +63,17 @@ fresh version/state directory. Never overwrite a published release archive.
 
 ## Publishing a release
 
-Releases run locally. The shared driver calls this repository's `scripts/release.sh`, publishes the immutable GitHub release and updates `localfoundry/homebrew-tap`:
+Releases run locally and from this checkout alone:
 
 ```bash
-~/.agents/skills/macos-sign-release/scripts/release.sh --project smartastic --version x.y.z
+VERSION=1.1.1 ./scripts/release.sh --publish
 ```
 
-Add `--dry-run` to check the prerequisites without building anything. The driver requires a clean working tree; `scripts/release.sh` runs the release and unit tests before it builds. Signing uses the Developer ID identity from the local keychain; notarization uses the notarytool keychain profile `localfoundry-notary`. Identity, team ID and profile name are read from `~/.config/macos-sign-release/config.json`. No signing secret lives in GitHub.
+Without `--publish` the script writes the artifacts and stops. With `--publish` it creates the GitHub release for the tagged commit and copies `Casks/smartastic.rb` into `localfoundry/homebrew-tap` — cloned temporarily when `TAP_DIR` is not a checkout — refusing a downgrade or a same-version cask with different bytes, then runs `brew audit --cask --strict --online`. `SKIP_AUDIT=1` skips that audit.
+
+The shared driver `~/.agents/skills/macos-sign-release/scripts/release.sh --project smartastic --version x.y.z` is a convenience wrapper: it checks the prerequisites, resolves the signing identity, team ID and notary profile from `~/.config/macos-sign-release/config.json`, and then calls this same script with `--publish`.
+
+Add `--dry-run` to check the prerequisites without building anything. The script requires a clean working tree (unless `--force`), a free version tag locally and remotely, and a usable notary profile; it runs the release and unit tests before it builds. Missing credentials, a failed test or an existing version tag stop the release before anything is published. No signing secret lives in GitHub.
 
 For manual verification, download the published ZIP, check its checksum and launch the app on Apple Silicon and Intel.
 
