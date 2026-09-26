@@ -60,6 +60,9 @@ OUTPUT="${out:-$PWD/.build/releases}"
 mkdir -p "$OUTPUT"
 OUTPUT="$(cd "$OUTPUT" && pwd)"
 
+# Zustandsordner der Version: traegt Belege und Artefakte eines Laufs.
+STATE="$OUTPUT/.state-$VERSION"
+
 BUILD_NUMBER="${BUILD_NUMBER:-$(git rev-list --count HEAD)}"
 SIGN_CONFIG="${SIGN_CONFIG:-$HOME/.config/macos-sign-release/config.json}"
 NOTARY_PROFILE="${NOTARY_PROFILE:-$(plutil -extract notarization.keychain_profile raw -o - "$SIGN_CONFIG" 2>/dev/null || true)}"
@@ -98,7 +101,16 @@ if [[ -n "$upstream" ]]; then
     behind="$(git rev-list --count "HEAD..$upstream" 2>/dev/null || echo 0)"
     [[ "$behind" == 0 ]] || issues+=("$behind Commit(s) fehlen lokal gegenüber $upstream; erst pullen.")
 fi
-[[ ! -e "$OUTPUT/$ARCHIVE" && ! -e "$OUTPUT/$ARCHIVE.sha256" ]] || issues+=("Release artifact already exists: $OUTPUT/$ARCHIVE")
+# Ein Lauf, der nach der Notarisierung abgebrochen ist, darf fortsetzen: liegen
+# zum selben Commit schon Belege im Zustandsordner, sind die Artefakte in der
+# Ausgabe nur Kopien und werden ueberschrieben.
+resuming=0
+if [[ -s "$STATE/submission.json" && -f "$STATE/source-commit" && "$(cat "$STATE/source-commit")" == "$(git rev-parse HEAD)" ]]; then
+    resuming=1
+fi
+if [[ $resuming -eq 0 ]]; then
+    [[ ! -e "$OUTPUT/$ARCHIVE" && ! -e "$OUTPUT/$ARCHIVE.sha256" ]] || issues+=("Release artifact already exists: $OUTPUT/$ARCHIVE")
+fi
 
 if [[ ${#issues[@]} -gt 0 ]]; then
     echo "Voraussetzungen nicht erfüllt:" >&2
@@ -137,7 +149,6 @@ swift test
 
 # --- Bauen, signieren, notarisieren ------------------------------------------
 echo "== Bauen, signieren, notarisieren"
-STATE="$OUTPUT/.state-$VERSION"
 mkdir -p "$STATE"
 SOURCE_COMMIT="$(git rev-parse HEAD)"
 if [[ -e "$STATE/source-commit" ]]; then
@@ -195,7 +206,17 @@ release_args=("v$VERSION" "$OUTPUT/$ARCHIVE" "$OUTPUT/$ARCHIVE.sha256" "$OUTPUT/
 if [[ $draft -eq 1 ]]; then
     release_args+=(--draft)
 fi
-gh release create "${release_args[@]}"
+# GitHub erzeugt die Notizen serverseitig; der Aufruf kann mit HTTP 500
+# scheitern, ohne dass ein Release entsteht. Dann mit lokaler Notiz erneut.
+if ! gh release create "${release_args[@]}"; then
+    echo "   Notizen-Erzeugung fehlgeschlagen; erneut mit lokaler Notiz." >&2
+    fallback_args=()
+    for arg in "${release_args[@]}"; do
+        if [[ "$arg" == "--generate-notes" ]]; then continue; fi
+        fallback_args+=("$arg")
+    done
+    gh release create "${fallback_args[@]}" --notes "Release $VERSION"
+fi
 
 echo "== Homebrew-Tap"
 if [[ -n "${TAP_DIR:-}" && -d "${TAP_DIR}/.git" ]]; then
