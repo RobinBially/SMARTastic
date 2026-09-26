@@ -20,10 +20,10 @@ args.output.write_text(f'''cask "smartastic" do
   version "{args.version}"
   sha256 "{sha}"
 
-  url "https://github.com/RobinBially/SMARTastic/releases/download/v#{{version}}/SMARTastic-#{{version}}.zip"
+  url "https://github.com/localfoundry/SMARTastic/releases/download/v#{{version}}/SMARTastic-#{{version}}.zip"
   name "SMARTastic"
   desc "Native SSD and HDD health monitor"
-  homepage "https://github.com/RobinBially/SMARTastic"
+  homepage "https://github.com/localfoundry/SMARTastic"
 
   depends_on formula: "smartmontools"
   depends_on macos: :sonoma

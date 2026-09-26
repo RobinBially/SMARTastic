@@ -37,7 +37,7 @@ s=p.read_text()
 if '| `smartastic` |' not in s:
     anchor='|---|---|---|'
     assert anchor in s, 'Tap package table changed; update README explicitly.'
-    s=s.replace(anchor, anchor+'\n| `smartastic` | Cask · Native macOS drive health monitor | [RobinBially/SMARTastic](https://github.com/RobinBially/SMARTastic) |', 1)
+    s=s.replace(anchor, anchor+'\n| `smartastic` | Cask · Native macOS drive health monitor | [localfoundry/SMARTastic](https://github.com/localfoundry/SMARTastic) |', 1)
     s+='\n## Install SMARTastic\n\n```sh\nbrew install --cask localfoundry/tap/smartastic\n```\n\nRequires macOS 14+. The Universal app is signed and notarized. Homebrew also installs smartmontools.\n'
 p.write_text(s)
 PY

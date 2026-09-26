@@ -15,7 +15,7 @@
 #   BUILD_NUMBER        default: commit count of this checkout
 #   CODE_SIGN_IDENTITY  default: first Developer ID identity in the keychain
 #   NOTARY_PROFILE      default: localfoundry-notary
-#   RELEASE_REPOSITORY  default RobinBially/SMARTastic
+#   RELEASE_REPOSITORY  default localfoundry/SMARTastic
 #   TAP_REPOSITORY      default localfoundry/homebrew-tap
 #   TAP_DIR             existing tap checkout; otherwise cloned temporarily
 #   SKIP_AUDIT=1        skip the online brew audit after the tap push
@@ -34,7 +34,7 @@ for arg in "$@"; do
 done
 
 VERSION="${VERSION:?Set VERSION (x.y.z)}"
-RELEASE_REPOSITORY="${RELEASE_REPOSITORY:-RobinBially/SMARTastic}"
+RELEASE_REPOSITORY="${RELEASE_REPOSITORY:-localfoundry/SMARTastic}"
 TAP_REPOSITORY="${TAP_REPOSITORY:-localfoundry/homebrew-tap}"
 TAP_FORMULA="smartastic"
 ARCHIVE="SMARTastic-$VERSION.zip"

@@ -38,7 +38,7 @@ VERSION=1.1.0 ./scripts/release.sh --publish    # also publish release and cask
 
 `BUILD_NUMBER` defaults to the commit count, `CODE_SIGN_IDENTITY` to the first
 Developer ID identity in the keychain, `NOTARY_PROFILE` to `localfoundry-notary`
-and `RELEASE_REPOSITORY` to `RobinBially/SMARTastic`. `--dry-run` checks the
+and `RELEASE_REPOSITORY` to `localfoundry/SMARTastic`. `--dry-run` checks the
 prerequisites without building, `--force` tolerates a dirty working tree and
 `--draft` creates the GitHub release as a draft.
 
