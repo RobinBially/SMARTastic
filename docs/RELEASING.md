@@ -37,8 +37,8 @@ VERSION=1.1.0 ./scripts/release.sh --publish    # also publish release and cask
 ```
 
 `BUILD_NUMBER` defaults to the commit count, `CODE_SIGN_IDENTITY` to the first
-Developer ID identity in the keychain, `NOTARY_PROFILE` to `localfoundry-notary`
-and `RELEASE_REPOSITORY` to `localfoundry/SMARTastic`. `--dry-run` checks the
+Developer ID identity in the keychain, `NOTARY_PROFILE` to `robin-bially-notary`
+and `RELEASE_REPOSITORY` to `robin-bially/SMARTastic`. `--dry-run` checks the
 prerequisites without building, `--force` tolerates a dirty working tree and
 `--draft` creates the GitHub release as a draft.
 
@@ -69,7 +69,7 @@ Releases run locally and from this checkout alone:
 VERSION=1.1.1 ./scripts/release.sh --publish
 ```
 
-Without `--publish` the script writes the artifacts and stops. With `--publish` it creates the GitHub release for the tagged commit and copies `Casks/smartastic.rb` into `localfoundry/homebrew-tap` — cloned temporarily when `TAP_DIR` is not a checkout — refusing a downgrade or a same-version cask with different bytes, then runs `brew audit --cask --strict --online`. `SKIP_AUDIT=1` skips that audit.
+Without `--publish` the script writes the artifacts and stops. With `--publish` it creates the GitHub release for the tagged commit and copies `Casks/smartastic.rb` into `robin-bially/homebrew-tap` — cloned temporarily when `TAP_DIR` is not a checkout — refusing a downgrade or a same-version cask with different bytes, then runs `brew audit --cask --strict --online`. `SKIP_AUDIT=1` skips that audit.
 
 The shared driver `~/.agents/skills/macos-sign-release/scripts/release.sh --project smartastic --version x.y.z` is a convenience wrapper: it checks the prerequisites, resolves the signing identity, team ID and notary profile from `~/.config/macos-sign-release/config.json`, and then calls this same script with `--publish`.
 

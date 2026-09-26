@@ -4,7 +4,7 @@
 
 A native macOS app for understanding the health of your SSDs and hard drives.
 Built with SwiftUI, powered by [smartmontools](https://www.smartmontools.org/),
-and developed by [Robin Bially](https://github.com/localfoundry).
+and developed by [Robin Bially](https://github.com/robin-bially).
 
 <p>
   <img src="https://img.shields.io/badge/macOS-14%2B-blue?logo=apple" alt="macOS 14 or later">
@@ -82,16 +82,16 @@ JSON report exports the current SMART snapshot, not this local history.
 
 Requires **macOS 14 Sonoma or later** and **smartmontools 7 or later**.
 The app supports Apple Silicon and Intel. Homebrew distribution uses the
-[LocalFoundry tap](https://github.com/localfoundry/homebrew-tap).
+[Homebrew tap](https://github.com/robin-bially/homebrew-tap).
 
 Install the signed and Apple-notarized Universal app through Homebrew:
 
 ```sh
-brew install --cask localfoundry/tap/smartastic
+brew install --cask robin-bially/tap/smartastic
 ```
 
 The cask also installs smartmontools. For a manual app download from
-[GitHub Releases](https://github.com/localfoundry/SMARTastic/releases), install
+[GitHub Releases](https://github.com/robin-bially/SMARTastic/releases), install
 smartmontools separately:
 
 ```sh
@@ -135,7 +135,7 @@ Command Line Tools SDK lacks the SwiftUI macro plugin, select full Xcode or set
 
 ```sh
 brew install smartmontools
-git clone https://github.com/localfoundry/SMARTastic.git
+git clone https://github.com/robin-bially/SMARTastic.git
 cd SMARTastic
 swift test
 ./scripts/make-app.sh

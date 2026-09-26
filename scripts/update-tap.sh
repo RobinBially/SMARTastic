@@ -8,7 +8,7 @@ CASK="$PWD/.build/releases/Casks/smartastic.rb"
 test -f "$CASK"
 # This script runs on a disposable runner, after the release is public.
 gh auth setup-git
-gh repo clone localfoundry/homebrew-tap .build/tap
+gh repo clone robin-bially/homebrew-tap .build/tap
 # Never let recovery of an old release downgrade the currently distributed app.
 python3 - "$VERSION" "$CASK" <<'PYTHON'
 import re, sys
@@ -37,8 +37,8 @@ s=p.read_text()
 if '| `smartastic` |' not in s:
     anchor='|---|---|---|'
     assert anchor in s, 'Tap package table changed; update README explicitly.'
-    s=s.replace(anchor, anchor+'\n| `smartastic` | Cask · Native macOS drive health monitor | [localfoundry/SMARTastic](https://github.com/localfoundry/SMARTastic) |', 1)
-    s+='\n## Install SMARTastic\n\n```sh\nbrew install --cask localfoundry/tap/smartastic\n```\n\nRequires macOS 14+. The Universal app is signed and notarized. Homebrew also installs smartmontools.\n'
+    s=s.replace(anchor, anchor+'\n| `smartastic` | Cask · Native macOS drive health monitor | [robin-bially/SMARTastic](https://github.com/robin-bially/SMARTastic) |', 1)
+    s+='\n## Install SMARTastic\n\n```sh\nbrew install --cask robin-bially/tap/smartastic\n```\n\nRequires macOS 14+. The Universal app is signed and notarized. Homebrew also installs smartmontools.\n'
 p.write_text(s)
 PY
 git -C .build/tap config user.name 'Robin Bially'
@@ -48,10 +48,10 @@ if ! git -C .build/tap diff --cached --quiet; then
     git -C .build/tap commit -m "Release SMARTastic $VERSION"
 fi
 
-brew tap localfoundry/tap "$PWD/.build/tap"
-brew style localfoundry/tap/smartastic
-brew audit --cask --strict --online localfoundry/tap/smartastic
-brew install --cask localfoundry/tap/smartastic
+brew tap robin-bially/tap "$PWD/.build/tap"
+brew style robin-bially/tap/smartastic
+brew audit --cask --strict --online robin-bially/tap/smartastic
+brew install --cask robin-bially/tap/smartastic
 test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' /Applications/SMARTastic.app/Contents/Info.plist)" = "$VERSION"
 ./scripts/check-architectures.sh /Applications/SMARTastic.app/Contents/MacOS/SMARTastic
 codesign --verify --deep --strict /Applications/SMARTastic.app
